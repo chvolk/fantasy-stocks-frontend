@@ -1,0 +1,48 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import store from '@/store'
+import LandingPage from '@/components/LandingPage.vue'
+import SignupPage from '@/components/SignupPage.vue'
+import UserDashboard from '@/components/UserDashboard.vue'
+import LeaguesPage from '@/components/LeaguesPage.vue'
+import LoginPage from '@/components/LoginPage.vue'
+import StockDraft from '@/components/StockDraft.vue'
+
+const routes = [
+  { path: '/', component: LandingPage },
+  { path: '/signup', component: SignupPage },
+  { path: '/login', component: LoginPage },
+  { 
+    path: '/dashboard', 
+    component: UserDashboard,
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: '/leagues', 
+    component: LeaguesPage,
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: '/draft', 
+    component: StockDraft,
+    meta: { requiresAuth: true }
+  },
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!store.getters['auth/isAuthenticated']) {
+      next('/login')
+    } else {
+      next()
+    }
+  } else {
+    next()
+  }
+})
+
+export default router

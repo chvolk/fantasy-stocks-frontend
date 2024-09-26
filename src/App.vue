@@ -1,26 +1,74 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <v-app>
+    <v-navigation-drawer v-model="drawer" app temporary v-if="isAuthenticated">
+      <v-list>
+        <v-list-item to="/dashboard">
+          <v-list-item-icon>
+            <v-icon>mdi-view-dashboard</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Dashboard</v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/leagues">
+          <v-list-item-icon>
+            <v-icon>mdi-trophy</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Leagues</v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/draft">
+          <v-list-item-icon>
+            <v-icon>mdi-chart-line</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Draft</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="signOut">
+          <v-list-item-icon>
+            <v-icon>mdi-logout</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Sign Out</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-app-bar app color="primary" dark>
+      <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated"></v-app-bar-nav-icon>
+      <v-toolbar-title>Fantasy Stocks</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <template v-if="isAuthenticated">
+        <v-btn icon to="/dashboard">
+          <v-icon>mdi-view-dashboard</v-icon>
+        </v-btn>
+        <v-btn icon to="/leagues">
+          <v-icon>mdi-trophy</v-icon>
+        </v-btn>
+        <v-btn icon to="/draft">
+          <v-icon>mdi-chart-line</v-icon>
+        </v-btn>
+      </template>
+    </v-app-bar>
+
+    <v-main>
+      <router-view/>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
+  data: () => ({
+    drawer: false,
+  }),
+  computed: {
+    ...mapGetters('auth', ['isAuthenticated']),
+  },
+  methods: {
+    ...mapActions('auth', ['logout']),
+    async signOut() {
+      await this.logout();
+      this.$router.push('/');
+    },
+  },
 }
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
