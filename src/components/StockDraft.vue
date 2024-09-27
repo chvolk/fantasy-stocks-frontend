@@ -4,7 +4,7 @@
       <v-col cols="12" md="10" lg="8">
         <v-card elevation="12" class="pa-6">
           <v-card-title class="text-h4 font-weight-bold text-center mb-4">
-            Stock Draft
+            Moq Draft
           </v-card-title>
           
           <v-card-subtitle class="text-h5 text-center mb-4">
