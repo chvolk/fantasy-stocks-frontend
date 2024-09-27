@@ -53,6 +53,7 @@
                     :sort-desc="[true]"
                     class="elevation-1"
                     height="400px"
+                    sortable
                   >
                     <template v-slot:top>
                       <v-text-field
@@ -61,7 +62,7 @@
                         label="Search"
                         :sort-by="sortBy"
                         :sort-desc="sortDesc"
-                        sortable
+                        
                         single-line
                         hide-details
                         class="mb-4"
