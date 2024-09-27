@@ -49,18 +49,20 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      error: null
     }
   },
   methods: {
     ...mapActions('auth', ['loginUser']),
     async login() {
       try {
+        this.error = null;
         await this.loginUser({ username: this.username, password: this.password });
         this.$router.push('/dashboard');
       } catch (error) {
-        // Handle login error (e.g., show an error message)
         console.error('Login failed:', error);
+        this.error = error.response?.data?.non_field_errors?.[0] || 'Login failed. Please try again.';
       }
     }
   }
