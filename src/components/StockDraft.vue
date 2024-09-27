@@ -186,7 +186,6 @@ export default {
   }
   },
   mounted() {
-    document.title = this.$title
     this.fetchAvailableStocks();
     this.fetchPortfolio();
   },

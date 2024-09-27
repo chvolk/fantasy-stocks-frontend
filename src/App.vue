@@ -69,8 +69,5 @@ export default {
       await this.logout();
       this.$router.push('/');
     },
-    mounted() {
-      document.title = this.$title
-  },
 }
 </script>

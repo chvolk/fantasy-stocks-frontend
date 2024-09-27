@@ -184,7 +184,6 @@ export default {
     }
   },
   mounted() {
-    document.title = this.$title
     this.fetchPortfolio();
     console.log('Headers:', this.table_headers);
   },
