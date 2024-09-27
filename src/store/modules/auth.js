@@ -51,6 +51,9 @@ const mutations = {
   SET_USER(state, user) {
     state.user = user;
   },
+  setToken(state, token) {
+    state.token = token;
+  }
 };
 
 export default {
