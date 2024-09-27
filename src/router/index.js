@@ -9,13 +9,17 @@ import StockDraft from '@/components/StockDraft.vue'
 import Leaderboard from '@/components/Leaderboard.vue'
 
 const routes = [
-  { path: '/', component: LandingPage },
+  {
+    path: '/',
+    component: LandingPage,
+    meta: { title: 'Moq Exchange - Home' }
+  },
   { path: '/signup', component: SignupPage },
   { path: '/login', component: LoginPage },
   { 
     path: '/dashboard', 
     component: UserDashboard,
-    meta: { requiresAuth: true }
+    meta: { title: 'Moq Exchange - Dashboard', requiresAuth: true }
   },
   { 
     path: '/leagues', 
@@ -40,6 +44,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  document.title = to.meta.title || 'Moq Exchange'
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!store.getters['auth/isAuthenticated']) {
       next('/login')
