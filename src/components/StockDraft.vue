@@ -59,6 +59,8 @@
                         v-model="search"
                         append-icon="mdi-magnify"
                         label="Search"
+                        :sort-by="sortBy"
+                        :sort-desc="sortDesc"
                         single-line
                         hide-details
                         class="mb-4"
@@ -162,6 +164,8 @@ export default {
     selectedIndustries: [],
     maxPriceFilter: '',
     industries: [],
+    sortBy: 'symbol', // Default sort column
+    sortDesc: false, // Def
     snackbar: false,
     snackbarText: '',
     snackbarColor: 'success',
