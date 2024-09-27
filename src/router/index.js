@@ -6,6 +6,7 @@ import UserDashboard from '@/components/UserDashboard.vue'
 import LeaguesPage from '@/components/LeaguesPage.vue'
 import LoginPage from '@/components/LoginPage.vue'
 import StockDraft from '@/components/StockDraft.vue'
+import Leaderboard from '@/components/Leaderboard.vue'
 
 const routes = [
   { path: '/', component: LandingPage },
@@ -25,6 +26,11 @@ const routes = [
     path: '/draft', 
     component: StockDraft,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/leaderboard',
+    name: 'Leaderboard',
+    component: Leaderboard
   },
 ]
 

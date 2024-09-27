@@ -8,11 +8,11 @@
           </v-list-item-icon>
           <v-list-item-title>Dashboard</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/leagues">
+        <v-list-item to="/leaderboard">
           <v-list-item-icon>
             <v-icon>mdi-trophy</v-icon>
           </v-list-item-icon>
-          <v-list-item-title>Leagues</v-list-item-title>
+          <v-list-item-title>Leaderboard</v-list-item-title>
         </v-list-item>
         <v-list-item to="/draft">
           <v-list-item-icon>
@@ -37,7 +37,7 @@
         <v-btn icon to="/dashboard">
           <v-icon>mdi-view-dashboard</v-icon>
         </v-btn>
-        <v-btn icon to="/leagues">
+        <v-btn icon to="/leaderboard">
           <v-icon>mdi-trophy</v-icon>
         </v-btn>
         <v-btn icon to="/draft">

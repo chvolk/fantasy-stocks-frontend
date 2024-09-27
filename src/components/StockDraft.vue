@@ -7,6 +7,10 @@
             Stock Draft
           </v-card-title>
           
+          <v-card-subtitle class="text-h5 text-center mb-4">
+            Available Balance: ${{ balance.toFixed(2) }}
+          </v-card-subtitle>
+          
           <v-row>
             <v-col cols="12" md="8">
               <v-card outlined>
@@ -48,6 +52,7 @@
                     :sort-by="['current_price']"
                     :sort-desc="[true]"
                     class="elevation-1"
+                    height="400px"
                   >
                     <template v-slot:top>
                       <v-text-field
@@ -76,7 +81,7 @@
             <v-col cols="12" md="4">
               <v-card outlined>
                 <v-card-title>Your Portfolio</v-card-title>
-                <v-card-text style="height: 400px; overflow-y: auto;">  <!-- Match height with table and make scrollable -->
+                <v-card-text style="height: 400px; overflow-y: auto;">
                   <v-list dense>
                     <v-list-item v-for="stock in portfolio" :key="stock.stock.symbol">
                       <v-list-item-content>
@@ -143,11 +148,11 @@ export default {
   name: 'StockDraft',
   data: () => ({
     headers: [
-      { text: 'Symbol', value: 'symbol' },
-      { text: 'Name', value: 'name' },
-      { text: 'Industry', value: 'industry' },
-      { text: 'Current Price', value: 'current_price' },
-      { text: 'Actions', value: 'actions', sortable: false }
+      { title: 'Symbol', value: 'symbol' },
+      { title: 'Name', value: 'name' },
+      { title: 'Industry', value: 'industry' },
+      { title: 'Current Price', value: 'current_price' },
+      { title: 'Actions', value: 'actions', sortable: false }
     ],
     availableStocks: [],
     draftedStocks: [],
@@ -163,6 +168,7 @@ export default {
     draftDialog: false,
     selectedStock: null,
     draftQuantity: 1,
+    balance: 50000,
     portfolio: [],
   }),
   computed: {
@@ -211,9 +217,9 @@ export default {
           }
         });
         this.portfolio = response.data.stocks;
-        console.log('Fetched portfolio:', this.portfolio);
+        this.balance = response.data.balance;
       } catch (error) {
-        console.error('Error fetching portfolio:', error)
+        console.error('Error fetching portfolio:', error);
       }
     },
     openDraftDialog(stock) {
@@ -229,6 +235,14 @@ export default {
     async confirmDraft() {
       if (this.draftQuantity <= 0) {
         this.snackbarText = 'Please enter a valid quantity';
+        this.snackbarColor = 'error';
+        this.snackbar = true;
+        return;
+      }
+
+      const totalCost = this.selectedStock.current_price * this.draftQuantity;
+      if (totalCost > this.balance) {
+        this.snackbarText = 'Insufficient funds to complete this draft';
         this.snackbarColor = 'error';
         this.snackbar = true;
         return;
@@ -252,10 +266,10 @@ export default {
         this.snackbarText = `Successfully drafted ${this.draftQuantity} shares of ${this.selectedStock.name}`;
         this.snackbarColor = 'success';
         this.snackbar = true;
+        this.balance = response.data.remaining_balance;
         this.closeDraftDialog();
-        // Update the portfolio or available stocks as needed
-        this.fetchAvailableStocks(); // Refresh the available stocks
         this.fetchPortfolio(); // Refresh the portfolio
+        this.fetchAvailableStocks(); // Refresh the available stocks
       } catch (error) {
         console.error('Error drafting stock:', error.response ? error.response.data : error);
         this.snackbarText = 'Failed to draft stock. Please try again.';
