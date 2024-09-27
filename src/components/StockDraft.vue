@@ -61,6 +61,7 @@
                         label="Search"
                         :sort-by="sortBy"
                         :sort-desc="sortDesc"
+                        sortable
                         single-line
                         hide-details
                         class="mb-4"
