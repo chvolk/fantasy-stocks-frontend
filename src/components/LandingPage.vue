@@ -2,8 +2,8 @@
   <v-container fluid class="pa-0">
     <v-row class="hero-section align-center justify-center" style="height: 100vh;">
       <v-col cols="12" md="8" class="text-center">
-        <h1 class="text-h2 font-weight-bold mb-4">Welcome to Fantasy Stocks</h1>
-        <p class="text-h5 mb-6">Experience the thrill of stock trading without the risk. Build your portfolio, compete with friends, and learn the market!</p>
+        <h1 class="text-h2 font-weight-bold mb-4">Welcome to Moq Exchange</h1>
+        <p class="text-h5 mb-6">Buy low, sell high. Play the weekly challenge and climb the leaderboard.</p>
         <v-btn x-large color="primary" class="mr-4" to="/signup">Get Started</v-btn>
         <v-btn x-large outlined to="/login">Login</v-btn>
       </v-col>
