@@ -1,7 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Login from '../components/LoginPage.vue'
-import Dashboard from '../components/UserDashboard.vue'
+import store from '@/store'
+import LandingPage from '@/components/LandingPage.vue'
+import SignupPage from '@/components/SignupPage.vue'
+import UserDashboard from '@/components/UserDashboard.vue'
+import LeaguesPage from '@/components/LeaguesPage.vue'
+import LoginPage from '@/components/LoginPage.vue'
+import StockDraft from '@/components/StockDraft.vue'
+import Leaderboard from '@/components/Leaderboard.vue'
 
 const routes = [
   { path: '/', component: LandingPage },
