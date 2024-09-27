@@ -8,6 +8,11 @@ export default createStore({
   state: {
     isAuthenticated: false,
     user: null,
+    snackbar: {
+      show: false,
+      text: '',
+      color: ''
+    }
   },
   mutations: {
     SET_AUTHENTICATED(state, isAuthenticated) {
@@ -16,6 +21,17 @@ export default createStore({
     SET_USER(state, user) {
       state.user = user;
     },
+    setUser(state, user) {
+      state.user = user;
+    },
+    setSnackbar(state, payload) {
+      state.snackbar.show = true;
+      state.snackbar.text = payload.text;
+      state.snackbar.color = payload.color;
+    },
+    closeSnackbar(state) {
+      state.snackbar.show = false;
+    }
   },
   actions: {
     login({ commit }, userData) {
@@ -26,6 +42,9 @@ export default createStore({
       commit('SET_AUTHENTICATED', false);
       commit('SET_USER', null);
     },
+    showSnackbar({ commit }, payload) {
+      commit('setSnackbar', payload);
+    }
   },
   getters: {
     isAuthenticated: state => state.isAuthenticated,

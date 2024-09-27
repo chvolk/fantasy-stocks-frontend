@@ -46,25 +46,23 @@ import { mapActions } from 'vuex';
 
 export default {
   name: 'LoginPage',
-  data: () => ({
-    username: '',
-    password: '',
-    error: null,
-  }),
+  data() {
+    return {
+      username: '',
+      password: ''
+    }
+  },
   methods: {
     ...mapActions('auth', ['loginUser']),
     async login() {
       try {
-        await this.loginUser({
-          username: this.username,
-          password: this.password,
-        });
+        await this.loginUser({ username: this.username, password: this.password });
         this.$router.push('/dashboard');
       } catch (error) {
-        console.error('Login failed', error);
-        this.error = 'Invalid username or password';
+        // Handle login error (e.g., show an error message)
+        console.error('Login failed:', error);
       }
-    },
-  },
+    }
+  }
 }
 </script>

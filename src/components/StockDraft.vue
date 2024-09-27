@@ -8,7 +8,7 @@
           </v-card-title>
           
           <v-card-subtitle class="text-h5 text-center mb-4">
-            Available Balance: ${{ balance.toFixed(2) }}
+            Available Balance: ${{ formattedBalance }}
           </v-card-subtitle>
           
           <v-row>
@@ -168,7 +168,7 @@ export default {
     draftDialog: false,
     selectedStock: null,
     draftQuantity: 1,
-    balance: 50000,
+    balance: 0,
     portfolio: [],
   }),
   computed: {
@@ -180,7 +180,10 @@ export default {
           (stock.current_price && stock.current_price <= parseFloat(this.maxPriceFilter));
         return matchesIndustry && matchesPrice;
       });
-    }
+    },
+    formattedBalance() {
+    return typeof this.balance === 'number' ? this.balance.toFixed(2) : '0.00'
+  }
   },
   mounted() {
     this.fetchAvailableStocks();
@@ -217,7 +220,7 @@ export default {
           }
         });
         this.portfolio = response.data.stocks;
-        this.balance = response.data.balance;
+        this.balance = Number(response.data.balance);
       } catch (error) {
         console.error('Error fetching portfolio:', error);
       }

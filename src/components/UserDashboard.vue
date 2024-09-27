@@ -4,7 +4,7 @@
       <v-col cols="12" md="10" lg="8">
         <v-card elevation="12" class="pa-6">
           <v-card-title class="text-h4 font-weight-bold text-center mb-4">
-            Your Dashboard
+            {{ username }}'s Dashboard
           </v-card-title>
 
           <v-card outlined>
@@ -22,15 +22,6 @@
                 :items-per-page="10"
                 show-headers
               >
-              <!-- <template v-slot:header="{ props: { table_headers } }">
-                <thead>
-                  <tr>
-                    <th v-for="header in table_headers" :key="header.value">
-                      {{ header.text }}
-                    </th>
-                  </tr>
-                </thead>
-              </template> -->
                 <template v-slot:item.stock.symbol="{ item }">
                   <v-chip :color="getRandomColor(item.stock.symbol)" text-color="white" small>
                     {{ item.stock.symbol }}
@@ -49,6 +40,9 @@
                   <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
                     {{ item.gain_loss >= 0 ? '+' : '-' }}${{ Math.abs(item.gain_loss).toFixed(2) }}
                   </span>
+                </template>
+                <template v-slot:item.actions="{ item }">
+                  <v-btn small color="error" @click="openSellDialog(item)">Sell</v-btn>
                 </template>
                 <template v-slot:footer>
                   <v-row class="mt-2 pa-2" align="center" justify="space-between">
@@ -96,6 +90,38 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-dialog v-model="sellDialog" max-width="400px">
+      <v-card>
+        <v-card-title>Sell Shares</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <p>Stock: {{ selectedStock ? selectedStock.stock.symbol : '' }}</p>
+              <p>Current Price: ${{ selectedStock ? selectedStock.stock.current_price : 0 }}</p>
+              <p>Owned Shares: {{ selectedStock ? selectedStock.quantity : 0 }}</p>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model.number="sellQuantity"
+                label="Number of Shares to Sell"
+                type="number"
+                min="1"
+                :max="selectedStock ? selectedStock.quantity : 1"
+                :rules="[
+                  v => v > 0 || 'Quantity must be greater than 0',
+                  v => v <= (selectedStock ? selectedStock.quantity : 0) || 'Cannot sell more shares than owned'
+                ]"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeSellDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmSell">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -113,12 +139,25 @@ export default {
       { title: 'Current Price', align: 'end', value: 'stock.current_price' },
       { title: 'Total Value', align: 'end', value: 'totalValue' },
       { title: 'Gain/Loss', align: 'end', value: 'gain_loss' },
+      { title: 'Actions', align: 'end', value: 'actions', sortable: false},
     ],
     portfolio: [],
+    sellDialog: false,
+    selectedStock: null,
+    sellQuantity: 1,
     balance: 0,
+    username: '',
     initialInvestment: 50000, // The starting amount
   }),
   computed: {
+    formattedUsername() {
+      // Format the username to capitalize the first letter. Add an 's or an ' if it ends in 's'
+      if (this.username.endsWith('s')) {
+        return this.username.charAt(0).toUpperCase() + this.username.slice(1) + "'";
+      } else {
+        return this.username.charAt(0).toUpperCase() + this.username.slice(1) + "'s";
+      }
+    },
     portfolioWithTotalValue() {
       return this.portfolio.map(item => {
         const totalValue = Number(item.quantity) * Number(item.stock.current_price);
@@ -167,6 +206,7 @@ export default {
           }
         }));
         this.balance = Number(response.data.balance);
+        this.username = response.data.user;
         
         this.$nextTick(() => {
           this.$forceUpdate();
@@ -184,7 +224,56 @@ export default {
       const colors = ['primary', 'secondary', 'accent', 'success', 'info', 'warning'];
       const index = symbol.charCodeAt(0) % colors.length;
       return colors[index];
-    }
+    },
+    openSellDialog(stock) {
+      this.selectedStock = stock;
+      this.sellQuantity = 1;
+      this.sellDialog = true;
+    },
+    closeSellDialog() {
+      this.sellDialog = false;
+      this.selectedStock = null;
+      this.sellQuantity = 1;
+    },
+    async confirmSell() {
+      if (this.sellQuantity <= 0 || this.sellQuantity > this.selectedStock.quantity) {
+        this.$store.commit('setSnackbar', {
+          text: 'Please enter a valid quantity',
+          color: 'error'
+        });
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.post('/api/sell/', // Changed from '/api/stocks/sell/'
+          { 
+            symbol: this.selectedStock.stock.symbol,
+            quantity: this.sellQuantity
+          },
+          { 
+            headers: { 
+              'Authorization': `Token ${token}`,
+              'Content-Type': 'application/json',
+            } 
+          }
+        );
+
+        this.$store.commit('setSnackbar', {
+          text: `Successfully sold ${this.sellQuantity} shares of ${this.selectedStock.stock.symbol}`,
+          color: 'success'
+        });
+
+        this.closeSellDialog();
+        this.fetchPortfolio(); // Refresh the portfolio
+      } catch (error) {
+        console.error('Error selling stock:', error.response ? error.response.data : error);
+        this.$store.commit('setSnackbar', {
+          text: 'Failed to sell stock. Please try again.',
+          color: 'error'
+        });
+      }
+    },
   },
 }
 </script>
