@@ -1,8 +1,16 @@
 import api from './api';
 
 const authService = {
-  login(credentials) {
-    return api.post('login/', credentials);
+  async login(username, password) {
+    try {
+      const response = await axios.post('/api/login/', { username, password });
+      const token = response.data.token;
+      console.log('Received token:', token); // Debug log
+      localStorage.setItem('token', token);
+      // Other login logic...
+    } catch (error) {
+      console.error('Login failed:', error.response ? error.response.data : error);
+    }
   },
   signup(user) {
     return api.post('signup/', user);

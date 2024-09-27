@@ -1,117 +1,268 @@
 <template>
-    <v-container>
-      <h2 class="text-h4 mb-4">Draft Stocks</h2>
-      <v-alert v-if="error" type="error" dismissible>
-        {{ error }}
-      </v-alert>
-      <v-row>
-        <v-col cols="12" md="8">
-          <v-card>
-            <v-card-title>
-              Available Stocks
-              <v-spacer></v-spacer>
+  <v-container fluid class="fill-height pa-0" style="background: linear-gradient(to right, #4CAF50, #2196F3);">
+    <v-row align="center" justify="center" class="mx-0">
+      <v-col cols="12" md="10" lg="8">
+        <v-card elevation="12" class="pa-6">
+          <v-card-title class="text-h4 font-weight-bold text-center mb-4">
+            Stock Draft
+          </v-card-title>
+          
+          <v-row>
+            <v-col cols="12" md="8">
+              <v-card outlined>
+                <v-card-title>Available Stocks</v-card-title>
+                <v-card-text>
+                  <v-row>
+                    <v-col cols="12" sm="6">
+                      <v-autocomplete
+                        v-model="selectedIndustries"
+                        :items="industries"
+                        label="Filter by Industry"
+                        multiple
+                        chips
+                        small-chips
+                        deletable-chips
+                        clearable
+                        dense
+                        outlined
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col cols="12" sm="6">
+                      <v-text-field
+                        v-model.number="maxPriceFilter"
+                        label="Max Price"
+                        type="number"
+                        clearable
+                        outlined
+                        dense
+                        prefix="$"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-data-table
+                    :headers="headers"
+                    :items="filteredStocks"
+                    :search="search"
+                    :items-per-page="10"
+                    :loading="loading"
+                    :sort-by="['current_price']"
+                    :sort-desc="[true]"
+                    class="elevation-1"
+                  >
+                    <template v-slot:top>
+                      <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        single-line
+                        hide-details
+                        class="mb-4"
+                      ></v-text-field>
+                    </template>
+                    <template v-slot:item.current_price="{ item }">
+                      ${{ item.current_price }}
+                    </template>
+                    <template v-slot:item.industry="{ item }">
+                      {{ item.industry || 'N/A' }}
+                    </template>
+                    <template v-slot:item.actions="{ item }">
+                      <v-btn small color="primary" @click="openDraftDialog(item)">Draft</v-btn>
+                    </template>
+                  </v-data-table>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            
+            <v-col cols="12" md="4">
+              <v-card outlined>
+                <v-card-title>Your Portfolio</v-card-title>
+                <v-card-text style="height: 400px; overflow-y: auto;">  <!-- Match height with table and make scrollable -->
+                  <v-list dense>
+                    <v-list-item v-for="stock in portfolio" :key="stock.stock.symbol">
+                      <v-list-item-content>
+                        <v-list-item-title>{{ stock.stock.symbol }}</v-list-item-title>
+                        <v-list-item-subtitle>
+                          {{ stock.quantity }} shares @ ${{ stock.stock.current_price }}
+                        </v-list-item-subtitle>
+                      </v-list-item-content>
+                      <v-list-item-action>
+                        ${{ (stock.quantity * stock.stock.current_price).toFixed(2) }}
+                      </v-list-item-action>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
+    
+    <!-- Draft Dialog -->
+    <v-dialog v-model="draftDialog" max-width="400px">
+      <v-card>
+        <v-card-title>Draft Shares</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <p>Stock: {{ selectedStock ? selectedStock.name : '' }}</p>
+              <p>Current Price: ${{ selectedStock ? selectedStock.current_price : 0 }}</p>
+            </v-col>
+            <v-col cols="12">
               <v-text-field
-                v-model="search"
-                append-icon="mdi-magnify"
-                label="Search"
-                single-line
-                hide-details
+                v-model.number="draftQuantity"
+                label="Number of Shares"
+                type="number"
+                min="1"
+                :rules="[v => v > 0 || 'Quantity must be greater than 0']"
               ></v-text-field>
-            </v-card-title>
-            <v-data-table
-              :headers="headers"
-              :items="availableStocks"
-              :search="search"
-              :items-per-page="10"
-              :loading="loading"
-              :sort-by="['current_price']"
-              :sort-desc="[true]"
-              class="elevation-1"
-            >
-              <template v-slot:item.current_price="{ item }">
-                ${{ item.current_price }}
-              </template>
-              <template v-slot:item.actions="{ item }">
-                <v-btn small color="primary" @click="draftStock(item)">Draft</v-btn>
-              </template>
-            </v-data-table>
-          </v-card>
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-card>
-            <v-card-title>Your Portfolio</v-card-title>
-            <v-list>
-              <v-list-item v-for="stock in draftedStocks" :key="stock.symbol">
-                <v-list-item-content>
-                  <v-list-item-title>{{ stock.symbol }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ stock.name }}</v-list-item-subtitle>
-                </v-list-item-content>
-                <v-list-item-action>
-                  ${{ stock.current_price }}
-                </v-list-item-action>
-              </v-list-item>
-            </v-list>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </template>
-  
-  <script>
-  import axios from 'axios'
-  
-  export default {
-    name: 'StockDraft',
-    data: () => ({
-      headers: [
-        { text: 'Symbol', value: 'symbol' },
-        { text: 'Name', value: 'name' },
-        { 
-          text: 'Current Price', 
-          value: 'current_price', 
-          sort: (a, b) => {
-            const priceA = parseFloat(a.replace('$', ''));
-            const priceB = parseFloat(b.replace('$', ''));
-            return priceB - priceA;
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeDraftDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmDraft">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" top>
+      {{ snackbarText }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar = false">Close</v-btn>
+      </template>
+    </v-snackbar>
+  </v-container>
+</template>
+
+<script>
+import axios from 'axios'
+
+export default {
+  name: 'StockDraft',
+  data: () => ({
+    headers: [
+      { text: 'Symbol', value: 'symbol' },
+      { text: 'Name', value: 'name' },
+      { text: 'Industry', value: 'industry' },
+      { text: 'Current Price', value: 'current_price' },
+      { text: 'Actions', value: 'actions', sortable: false }
+    ],
+    availableStocks: [],
+    draftedStocks: [],
+    search: '',
+    loading: false,
+    error: null,
+    selectedIndustries: [],
+    maxPriceFilter: '',
+    industries: [],
+    snackbar: false,
+    snackbarText: '',
+    snackbarColor: 'success',
+    draftDialog: false,
+    selectedStock: null,
+    draftQuantity: 1,
+    portfolio: [],
+  }),
+  computed: {
+    filteredStocks() {
+      return this.availableStocks.filter(stock => {
+        const matchesIndustry = this.selectedIndustries.length === 0 || 
+          (stock.industry && this.selectedIndustries.includes(stock.industry));
+        const matchesPrice = !this.maxPriceFilter || 
+          (stock.current_price && stock.current_price <= parseFloat(this.maxPriceFilter));
+        return matchesIndustry && matchesPrice;
+      });
+    }
+  },
+  mounted() {
+    this.fetchAvailableStocks();
+    this.fetchPortfolio();
+  },
+  methods: {
+    async fetchAvailableStocks() {
+      this.loading = true;
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/stocks/available/', {
+          headers: {
+            'Authorization': `Token ${token}`
           }
-        },
-        { text: 'Actions', value: 'actions', sortable: false },
-      ],
-      availableStocks: [],
-      draftedStocks: [],
-      search: '',
-      loading: false,
-      error: null,
-    }),
-    mounted() {
-      this.fetchAvailableStocks()
+        });
+        this.availableStocks = response.data;
+        this.industries = [...new Set(this.availableStocks
+          .map(stock => stock.industry)
+          .filter(industry => industry)
+        )].sort();
+      } catch (error) {
+        console.error('Error fetching stocks:', error);
+        this.error = 'Failed to fetch available stocks. Please try again later.';
+      } finally {
+        this.loading = false;
+      }
     },
-    methods: {
-      async fetchAvailableStocks() {
-        this.loading = true
-        this.error = null
-        try {
-          const response = await axios.get('/api/stocks/available/')
-          this.availableStocks = response.data
-          console.log('Fetched stocks:', this.availableStocks)
-        } catch (error) {
-          console.error('Error fetching stocks:', error)
-          this.error = 'Failed to fetch available stocks. Please try again later.'
-        } finally {
-          this.loading = false
-        }
-      },
-      async draftStock(stock) {
-        try {
-          const response = await axios.post('/api/stocks/draft/', { symbol: stock.symbol })
-          console.log(response.data.message)
-          this.draftedStocks.push(stock)
-          this.availableStocks = this.availableStocks.filter(s => s.symbol !== stock.symbol)
-        } catch (error) {
-          console.error('Error drafting stock:', error)
-          this.error = 'Failed to draft stock. Please try again.'
-        }
-      },
+    async fetchPortfolio() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/portfolio/', {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        this.portfolio = response.data.stocks;
+        console.log('Fetched portfolio:', this.portfolio);
+      } catch (error) {
+        console.error('Error fetching portfolio:', error)
+      }
     },
-  }
-  </script>
+    openDraftDialog(stock) {
+      this.selectedStock = stock;
+      this.draftQuantity = 1;
+      this.draftDialog = true;
+    },
+    closeDraftDialog() {
+      this.draftDialog = false;
+      this.selectedStock = null;
+      this.draftQuantity = 1;
+    },
+    async confirmDraft() {
+      if (this.draftQuantity <= 0) {
+        this.snackbarText = 'Please enter a valid quantity';
+        this.snackbarColor = 'error';
+        this.snackbar = true;
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.post('/api/stocks/draft/', 
+          { 
+            symbol: this.selectedStock.symbol,
+            quantity: this.draftQuantity
+          },
+          { 
+            headers: { 
+              'Authorization': `Token ${token}`,
+              'Content-Type': 'application/json',
+            } 
+          }
+        );
+        console.log('Draft response:', response.data);
+        this.snackbarText = `Successfully drafted ${this.draftQuantity} shares of ${this.selectedStock.name}`;
+        this.snackbarColor = 'success';
+        this.snackbar = true;
+        this.closeDraftDialog();
+        // Update the portfolio or available stocks as needed
+        this.fetchAvailableStocks(); // Refresh the available stocks
+        this.fetchPortfolio(); // Refresh the portfolio
+      } catch (error) {
+        console.error('Error drafting stock:', error.response ? error.response.data : error);
+        this.snackbarText = 'Failed to draft stock. Please try again.';
+        this.snackbarColor = 'error';
+        this.snackbar = true;
+      }
+    },
+  },
+}
+</script>
