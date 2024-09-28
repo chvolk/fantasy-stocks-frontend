@@ -9,6 +9,7 @@ import StockDraft from '@/components/StockDraft.vue'
 import Leaderboard from '@/components/Leaderboard.vue'
 
 const routes = [
+  { path: '/admin', name: 'Admin', beforeEnter: () => { window.location.href = '/admin/' } },
   { path: '/', component: LandingPage },
   { path: '/signup', component: SignupPage },
   { path: '/login', component: LoginPage },
