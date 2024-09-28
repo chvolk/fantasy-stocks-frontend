@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://moq.exchange/api/',
+  baseURL: '/api/',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
