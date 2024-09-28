@@ -115,7 +115,7 @@
           <v-row>
             <v-col cols="12">
               <p>Stock: {{ selectedStock ? selectedStock.name : '' }}</p>
-              <p>Current Price: ${{ selectedStock ? selectedStock.current_price : 0 }}</p>
+              <p>Current Price: ${{ selectedStock ? selectedStock.current_price.toFixed(2) : '0.00' }}</p>
             </v-col>
             <v-col cols="12">
               <v-text-field
@@ -126,12 +126,15 @@
                 :rules="[v => v > 0 || 'Quantity must be greater than 0']"
               ></v-text-field>
             </v-col>
+            <v-col cols="12">
+              <p class="font-weight-bold">Total Cost: ${{ totalCost.toFixed(2) }}</p>
+            </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeDraftDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="confirmDraft">Confirm</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmDraft" :disabled="!canDraft">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -188,8 +191,17 @@ export default {
       });
     },
     formattedBalance() {
-    return typeof this.balance === 'number' ? this.balance.toFixed(2) : '0.00'
-  }
+      return typeof this.balance === 'number' ? this.balance.toFixed(2) : '0.00'
+    },
+    totalCost() {
+      if (this.selectedStock && this.draftQuantity > 0) {
+        return this.selectedStock.current_price * this.draftQuantity;
+      }
+      return 0;
+    },
+    canDraft() {
+      return this.draftQuantity > 0 && this.totalCost <= this.balance;
+    }
   },
   mounted() {
     this.fetchAvailableStocks();
@@ -242,8 +254,10 @@ export default {
       this.draftQuantity = 1;
     },
     async confirmDraft() {
-      if (this.draftQuantity <= 0) {
-        this.snackbarText = 'Please enter a valid quantity';
+      if (!this.canDraft) {
+        this.snackbarText = this.totalCost > this.balance 
+          ? 'Insufficient funds to complete this draft' 
+          : 'Please enter a valid quantity';
         this.snackbarColor = 'error';
         this.snackbar = true;
         return;

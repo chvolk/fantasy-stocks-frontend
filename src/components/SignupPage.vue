@@ -4,7 +4,7 @@
       <v-col cols="12" sm="8" md="6" lg="4">
         <v-card elevation="12" class="pa-6">
           <v-card-title class="text-h4 font-weight-bold text-center mb-4">
-            Join Fantasy Stocks
+            Join Moq Exchange
           </v-card-title>
           <v-form @submit.prevent="signup">
             <v-text-field
