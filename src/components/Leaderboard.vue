@@ -32,8 +32,6 @@
   
   <script>
   import axios from 'axios'
-  import { Chart, registerables } from 'chart.js'
-  Chart.register(...registerables)
 
   export default {
     name: 'Leaderboard',
@@ -48,6 +46,9 @@
       chart: null,
     }),
     mounted() {
+      const { Chart, registerables } = await import('chart.js')
+      Chart.register(...registerables)
+      this.Chart = Chart
       this.fetchLeaderboard()
       this.fetchPortfolioHistory()
     },
