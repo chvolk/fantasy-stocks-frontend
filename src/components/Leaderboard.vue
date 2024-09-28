@@ -35,24 +35,30 @@
 
   export default {
     name: 'Leaderboard',
-    data: () => ({
-      headers: [
-        { title: 'Rank', align: 'start', value: 'rank' },
-        { title: 'Username', align: 'start', value: 'username' },
-        { title: 'Total Value', align: 'end', value: 'total_value' },
-        { title: 'Gain/Loss', align: 'end', value: 'gain_loss' },
-      ],
-      leaderboard: [],
-      chart: null,
-    }),
-    mounted() {
-      const { Chart, registerables } = await import('chart.js')
-      Chart.register(...registerables)
-      this.Chart = Chart
+    data() {
+      return {
+        headers: [
+          { title: 'Rank', align: 'start', value: 'rank' },
+          { title: 'Username', align: 'start', value: 'username' },
+          { title: 'Total Value', align: 'end', value: 'total_value' },
+          { title: 'Gain/Loss', align: 'end', value: 'gain_loss' },
+        ],
+        leaderboard: [],
+        chart: null,
+        Chart: null,
+      }
+    },
+    async mounted() {
+      await this.loadChartLibrary()
       this.fetchLeaderboard()
       this.fetchPortfolioHistory()
     },
     methods: {
+      async loadChartLibrary() {
+        const { Chart, registerables } = await import('chart.js')
+        Chart.register(...registerables)
+        this.Chart = Chart
+      },
       async fetchLeaderboard() {
         try {
           const token = localStorage.getItem('token')
@@ -82,7 +88,7 @@
           const data = response.data
 
           const ctx = this.$refs.chart.getContext('2d')
-          this.chart = new Chart(ctx, {
+          this.chart = new this.Chart(ctx, {
             type: 'line',
             data: {
               labels: data.map(entry => new Date(entry.timestamp).toLocaleString()),
