@@ -13,7 +13,7 @@ const authService = {
     }
   },
   signup(user) {
-    return api.post('signup/', user);
+    return api.post('/api/signup/', user);
   },
   // Add other auth-related methods as needed
 };
