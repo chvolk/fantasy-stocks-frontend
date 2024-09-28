@@ -67,6 +67,7 @@ export default {
   methods: {
     async signup() {
       try {
+        console.log('Attempting to signup with:', { username: this.username, email: this.email });
         const response = await authService.signup({
           username: this.username,
           email: this.email,
@@ -79,6 +80,7 @@ export default {
         this.router.push('/');
       } catch (error) {
         console.error('Signup failed', error);
+        authService.logAxiosError(error);
         this.error = error.response?.data?.message || 'An error occurred during signup. Please try again.';
       }
     },
