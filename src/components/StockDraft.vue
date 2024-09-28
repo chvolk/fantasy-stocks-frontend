@@ -49,8 +49,8 @@
                     :search="search"
                     :items-per-page="10"
                     :loading="loading"
-                    :sort-by="['current_price']"
-                    :sort-desc="[true]"
+                    :options.sync="tableOptions"
+                    @update:options="updateTableOptions"
                     class="elevation-1"
                     height="400px"
                     sortable
@@ -158,10 +158,10 @@ export default {
   name: 'StockDraft',
   data: () => ({
     headers: [
-      { title: 'Symbol', value: 'symbol' },
-      { title: 'Name', value: 'name' },
-      { title: 'Industry', value: 'industry' },
-      { title: 'Current Price', value: 'current_price' },
+      { title: 'Symbol', value: 'symbol', sortable: true },
+      { title: 'Name', value: 'name', sortable: true },
+      { title: 'Industry', value: 'industry', sortable: true },
+      { title: 'Current Price', value: 'current_price', sortable: true },
       { title: 'Actions', value: 'actions', sortable: false }
     ],
     availableStocks: [],
@@ -182,16 +182,31 @@ export default {
     draftQuantity: 1,
     balance: 0,
     portfolio: [],
+    tableOptions: {},
   }),
   computed: {
     filteredStocks() {
-      return this.availableStocks.filter(stock => {
+      let stocks = this.availableStocks.filter(stock => {
         const matchesIndustry = this.selectedIndustries.length === 0 || 
           (stock.industry && this.selectedIndustries.includes(stock.industry));
         const matchesPrice = !this.maxPriceFilter || 
           (stock.current_price && stock.current_price <= parseFloat(this.maxPriceFilter));
         return matchesIndustry && matchesPrice;
       });
+
+      // Apply sorting
+      if (this.tableOptions.sortBy && this.tableOptions.sortBy.length) {
+        const sortBy = this.tableOptions.sortBy[0];
+        const sortDesc = this.tableOptions.sortDesc[0];
+        stocks = stocks.sort((a, b) => {
+          let comparison = 0;
+          if (a[sortBy] < b[sortBy]) comparison = -1;
+          if (a[sortBy] > b[sortBy]) comparison = 1;
+          return sortDesc ? -comparison : comparison;
+        });
+      }
+
+      return stocks;
     },
     formattedBalance() {
       return typeof this.balance === 'number' ? this.balance.toFixed(2) : '0.00'
@@ -311,6 +326,9 @@ export default {
         this.snackbarColor = 'error';
         this.snackbar = true;
       }
+    },
+    updateTableOptions(options) {
+      this.tableOptions = options;
     },
   },
 }
