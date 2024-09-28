@@ -43,6 +43,7 @@ export default defineConfig({
         target: 'https://moq.exchange',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   }
