@@ -20,10 +20,10 @@
               </template>
             </v-data-table>
   
-            <v-card-title class="text-h5 font-weight-bold mb-4">
+            <!-- <v-card-title class="text-h5 font-weight-bold mb-4">
               Portfolio Value History
             </v-card-title>
-            <canvas ref="chart"></canvas>
+            <canvas ref="chart"></canvas> -->
           </v-card>
         </v-col>
       </v-row>
@@ -49,16 +49,10 @@
       }
     },
     async mounted() {
-      await this.loadChartLibrary()
       this.fetchLeaderboard()
       this.fetchPortfolioHistory()
     },
     methods: {
-      async loadChartLibrary() {
-        const { Chart, registerables } = await import('chart.js')
-        Chart.register(...registerables)
-        this.Chart = Chart
-      },
       async fetchLeaderboard() {
         try {
           const token = localStorage.getItem('token')

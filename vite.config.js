@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
+import path from 'path'
 
 const path = require('path')
 
@@ -25,6 +26,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['chart.js']
+  },
+  build: {
+    commonjsOptions: {
+      include: [/chart\.js/, /node_modules/]
+    }
   },
   server: {
     proxy: {
