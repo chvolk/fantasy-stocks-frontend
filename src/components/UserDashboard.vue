@@ -305,8 +305,14 @@ export default {
       this.tableOptions = options;
     },
     getNestedValue(obj, path) {
+    if (typeof path === 'string') {
       return path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
-    },
+    } else if (Array.isArray(path)) {
+      return path.reduce((prev, curr) => prev && prev[curr], obj);
+    } else {
+      return obj[path];
+    }
+  },
   },
 }
 </script>
