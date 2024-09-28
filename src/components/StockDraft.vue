@@ -47,10 +47,12 @@
                     :headers="headers"
                     :items="filteredStocks"
                     :search="search"
-                    :items-per-page="10"
-                    :loading="loading"
                     :options.sync="tableOptions"
                     @update:options="updateTableOptions"
+                    :items-per-page="tableOptions.itemsPerPage"
+                    :page.sync="tableOptions.page"
+                    :sort-by="tableOptions.sortBy"
+                    :sort-desc="tableOptions.sortDesc"
                     class="elevation-1"
                     height="400px"
                     sortable
@@ -182,7 +184,12 @@ export default {
     draftQuantity: 1,
     balance: 0,
     portfolio: [],
-    tableOptions: {},
+    tableOptions: {
+      sortBy: ['symbol'],
+      sortDesc: [false],
+      page: 1,
+      itemsPerPage: 10
+    },
   }),
   computed: {
     filteredStocks() {
@@ -195,9 +202,9 @@ export default {
       });
 
       // Apply sorting
-      if (this.tableOptions.sortBy && this.tableOptions.sortBy.length) {
+      if (this.tableOptions && this.tableOptions.sortBy && this.tableOptions.sortBy.length) {
         const sortBy = this.tableOptions.sortBy[0];
-        const sortDesc = this.tableOptions.sortDesc[0];
+        const sortDesc = this.tableOptions.sortDesc ? this.tableOptions.sortDesc[0] : false;
         stocks = stocks.sort((a, b) => {
           let comparison = 0;
           if (a[sortBy] < b[sortBy]) comparison = -1;
