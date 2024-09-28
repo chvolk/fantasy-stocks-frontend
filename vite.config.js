@@ -40,9 +40,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://moq.exchange/api/',
+        target: 'https://moq.exchange',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   }

@@ -73,14 +73,22 @@ export default {
           password: this.password,
         });
         console.log('Signup successful', response.data);
-        this.error = null; // Clear any previous errors
+        this.error = null;
         this.$emit('signup-success', 'Welcome aboard! Your account has been created successfully.');
-        // "Welcome to the party, pal!" - John McClane, Die Hard
         await new Promise(resolve => setTimeout(resolve, 1000));
         this.router.push('/');
       } catch (error) {
         console.error('Signup failed', error);
-        this.error = error.response?.data?.message || 'An error occurred during signup';
+        if (error.response) {
+          console.error('Error data:', error.response.data);
+          console.error('Error status:', error.response.status);
+          console.error('Error headers:', error.response.headers);
+        } else if (error.request) {
+          console.error('No response received:', error.request);
+        } else {
+          console.error('Error message:', error.message);
+        }
+        this.error = error.response?.data?.message || 'An error occurred during signup. Please try again.';
       }
     },
   },
