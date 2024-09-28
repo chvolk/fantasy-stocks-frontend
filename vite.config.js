@@ -23,6 +23,9 @@ export default defineConfig({
       'chart.js': 'chart.js/auto'
     },
   },
+  optimizeDeps: {
+    include: ['chart.js']
+  },
   server: {
     proxy: {
       '/api': {
