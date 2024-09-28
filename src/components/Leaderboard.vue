@@ -32,7 +32,8 @@
   
   <script>
   import axios from 'axios'
-  import Chart from 'chart.js/auto/auto.js'
+  import { Chart, registerables } from 'chart.js'
+  Chart.register(...registerables)
 
   export default {
     name: 'Leaderboard',
