@@ -11,7 +11,7 @@
               :headers="headers"
               :items="leaderboard"
               :items-per-page="10"
-              class="elevation-1"
+              class="elevation-1 mb-6"
             >
               <template v-slot:item.gain_loss="{ item }">
                 <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
@@ -19,6 +19,11 @@
                 </span>
               </template>
             </v-data-table>
+  
+            <v-card-title class="text-h5 font-weight-bold mb-4">
+              Portfolio Value History
+            </v-card-title>
+            <canvas ref="chart"></canvas>
           </v-card>
         </v-col>
       </v-row>
@@ -27,7 +32,8 @@
   
   <script>
   import axios from 'axios'
-  
+  import Chart from 'chart.js/auto'
+
   export default {
     name: 'Leaderboard',
     data: () => ({
@@ -38,9 +44,11 @@
         { title: 'Gain/Loss', align: 'end', value: 'gain_loss' },
       ],
       leaderboard: [],
+      chart: null,
     }),
     mounted() {
       this.fetchLeaderboard()
+      this.fetchPortfolioHistory()
     },
     methods: {
       async fetchLeaderboard() {
@@ -59,6 +67,47 @@
           }))
         } catch (error) {
           console.error('Error fetching leaderboard:', error)
+        }
+      },
+      async fetchPortfolioHistory() {
+        try {
+          const token = localStorage.getItem('token')
+          const response = await axios.get('/api/portfolio-history/', {
+            headers: {
+              'Authorization': `Token ${token}`
+            }
+          })
+          const data = response.data
+
+          const ctx = this.$refs.chart.getContext('2d')
+          this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: data.map(entry => new Date(entry.timestamp).toLocaleString()),
+              datasets: [{
+                label: 'Portfolio Value',
+                data: data.map(entry => entry.total_value),
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: {
+                  type: 'time',
+                  time: {
+                    unit: 'day'
+                  }
+                },
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          })
+        } catch (error) {
+          console.error('Error fetching portfolio history:', error)
         }
       }
     }
