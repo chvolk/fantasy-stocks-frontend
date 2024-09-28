@@ -31,7 +31,6 @@
 
     <v-app-bar app color="primary" dark>
       <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated"></v-app-bar-nav-icon>
-      <v-img src="/fav.png" height="30" width="30" class="mr-2"></v-img>
       <v-toolbar-title>Moq Exchange</v-toolbar-title>
       <v-spacer></v-spacer>
       <template v-if="isAuthenticated">
