@@ -115,7 +115,7 @@
           <v-row>
             <v-col cols="12">
               <p>Stock: {{ selectedStock ? selectedStock.name : '' }}</p>
-              <p>Current Price: ${{ selectedStock ? selectedStock.current_price.toFixed(2) : '0.00' }}</p>
+              <p>Current Price: ${{ selectedStock ? Number(selectedStock.current_price).toFixed(2) : '0.00' }}</p>
             </v-col>
             <v-col cols="12">
               <v-text-field
@@ -195,7 +195,7 @@ export default {
     },
     totalCost() {
       if (this.selectedStock && this.draftQuantity > 0) {
-        return this.selectedStock.current_price * this.draftQuantity;
+        return Number(this.selectedStock.current_price) * this.draftQuantity;
       }
       return 0;
     },
@@ -217,7 +217,10 @@ export default {
             'Authorization': `Token ${token}`
           }
         });
-        this.availableStocks = response.data;
+        this.availableStocks = response.data.map(stock => ({
+          ...stock,
+          current_price: Number(stock.current_price)
+        }));
         this.industries = [...new Set(this.availableStocks
           .map(stock => stock.industry)
           .filter(industry => industry)
@@ -244,9 +247,15 @@ export default {
       }
     },
     openDraftDialog(stock) {
-      this.selectedStock = stock;
+      this.selectedStock = {
+        ...stock,
+        current_price: Number(stock.current_price)
+      };
       this.draftQuantity = 1;
-      this.draftDialog = true;
+      // Delay opening the dialog
+      setTimeout(() => {
+        this.draftDialog = true;
+      }, 0);
     },
     closeDraftDialog() {
       this.draftDialog = false;
