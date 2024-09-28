@@ -19,7 +19,12 @@
               <v-data-table
                 :headers="table_headers"
                 :items="portfolioWithTotalValue"
-                :items-per-page="10"
+                :options.sync="tableOptions"
+                @update:options="updateTableOptions"
+                :items-per-page="tableOptions.itemsPerPage"
+                :page.sync="tableOptions.page"
+                :sort-by="tableOptions.sortBy"
+                :sort-desc="tableOptions.sortDesc"
                 show-headers
               >
                 <template v-slot:item.stock.symbol="{ item }">
@@ -132,13 +137,13 @@ export default {
   name: 'UserDashboard',
   data: () => ({  
     table_headers: [
-      { title: 'Ticker', align: 'start', value: 'stock.symbol' },
-      { title: 'Name', align: 'start', value: 'stock.name' },
-      { title: 'Quantity', align: 'end', value: 'quantity' },
-      { title: 'Purchase Price', align: 'end', value: 'stock.purchase_price' },
-      { title: 'Current Price', align: 'end', value: 'stock.current_price' },
-      { title: 'Total Value', align: 'end', value: 'totalValue' },
-      { title: 'Gain/Loss', align: 'end', value: 'gain_loss' },
+      { title: 'Ticker', align: 'start', value: 'stock.symbol', sortable: true },
+      { title: 'Name', align: 'start', value: 'stock.name', sortable: true },
+      { title: 'Quantity', align: 'end', value: 'quantity', sortable: true },
+      { title: 'Purchase Price', align: 'end', value: 'stock.purchase_price', sortable: true },
+      { title: 'Current Price', align: 'end', value: 'stock.current_price', sortable: true },
+      { title: 'Total Value', align: 'end', value: 'totalValue', sortable: true },
+      { title: 'Gain/Loss', align: 'end', value: 'gain_loss', sortable: true },
       { title: 'Actions', align: 'end', value: 'actions', sortable: false},
     ],
     portfolio: [],
@@ -148,6 +153,12 @@ export default {
     balance: 0,
     username: '',
     initialInvestment: 50000, // The starting amount
+    tableOptions: {
+      sortBy: ['stock.symbol'],
+      sortDesc: [false],
+      page: 1,
+      itemsPerPage: 10
+    },
   }),
   computed: {
     formattedUsername() {
@@ -159,7 +170,7 @@ export default {
       }
     },
     portfolioWithTotalValue() {
-      return this.portfolio.map(item => {
+      let portfolio = this.portfolio.map(item => {
         const totalValue = Number(item.quantity) * Number(item.stock.current_price);
         const purchaseValue = Number(item.quantity) * Number(item.stock.purchase_price);
         const gain_loss = totalValue - purchaseValue;
@@ -169,6 +180,22 @@ export default {
           gain_loss,
         };
       });
+
+      // Apply sorting
+      if (this.tableOptions && this.tableOptions.sortBy && this.tableOptions.sortBy.length) {
+        const sortBy = this.tableOptions.sortBy[0];
+        const sortDesc = this.tableOptions.sortDesc ? this.tableOptions.sortDesc[0] : false;
+        portfolio = portfolio.sort((a, b) => {
+          let aValue = this.getNestedValue(a, sortBy);
+          let bValue = this.getNestedValue(b, sortBy);
+          let comparison = 0;
+          if (aValue < bValue) comparison = -1;
+          if (aValue > bValue) comparison = 1;
+          return sortDesc ? -comparison : comparison;
+        });
+      }
+
+      return portfolio;
     },
     totalPortfolioValue() {
       return this.portfolioWithTotalValue.reduce((sum, item) => sum + item.totalValue, 0);
@@ -273,6 +300,12 @@ export default {
           color: 'error'
         });
       }
+    },
+    updateTableOptions(options) {
+      this.tableOptions = options;
+    },
+    getNestedValue(obj, path) {
+      return path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
     },
   },
 }
