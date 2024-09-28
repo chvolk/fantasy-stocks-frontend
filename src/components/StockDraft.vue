@@ -127,7 +127,9 @@
               ></v-text-field>
             </v-col>
             <v-col cols="12">
-              <p class="font-weight-bold">Total Cost: ${{ totalCost.toFixed(2) }}</p>
+              <p :class="{'error--text': totalCost > balance}">
+              Remaining Balance: ${{ (balance - totalCost).toFixed(2) }}
+              </p>
             </v-col>
           </v-row>
         </v-card-text>
