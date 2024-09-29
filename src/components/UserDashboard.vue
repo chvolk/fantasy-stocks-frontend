@@ -162,6 +162,9 @@ export default {
   }),
   computed: {
     formattedUsername() {
+      // Add a check to ensure username is defined
+      if (!this.username) return '';
+      
       // Format the username to capitalize the first letter. Add an 's or an ' if it ends in 's'
       if (this.username.endsWith('s')) {
         return this.username.charAt(0).toUpperCase() + this.username.slice(1) + "'";
@@ -233,7 +236,7 @@ export default {
           }
         }));
         this.balance = Number(response.data.balance);
-        this.username = response.data.user;
+        this.username = response.data.user || '';  // Provide a default value
         
         this.$nextTick(() => {
           this.$forceUpdate();
@@ -244,7 +247,8 @@ export default {
         console.log('Total Portfolio Value:', this.totalPortfolioValue);
         console.log('Total Gain/Loss:', this.totalGainLoss);
       } catch (error) {
-        console.error('Error fetching portfolio:', error)
+        console.error('Error fetching portfolio:', error);
+        this.username = '';  // Set a default value in case of an error
       }
     },
     getRandomColor(symbol) {
