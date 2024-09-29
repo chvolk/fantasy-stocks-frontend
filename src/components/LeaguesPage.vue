@@ -29,3 +29,4 @@ export default {
   // Add methods for fetching leagues, creating new leagues, etc.
 }
 </script>
+

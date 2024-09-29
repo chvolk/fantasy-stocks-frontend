@@ -56,7 +56,7 @@
       async fetchLeaderboard() {
         try {
           const token = localStorage.getItem('token')
-          const response = await axios.get('/api/leaderboard/', {
+          const response = await axios.get('http://localhost:8000/api/leaderboard/', {
             headers: {
               'Authorization': `Token ${token}`
             }
@@ -74,7 +74,7 @@
       async fetchPortfolioHistory() {
         try {
           const token = localStorage.getItem('token')
-          const response = await axios.get('/api/portfolio-history/', {
+          const response = await axios.get('http://localhost:8000/api/portfolio-history/', {
             headers: {
               'Authorization': `Token ${token}`
             }

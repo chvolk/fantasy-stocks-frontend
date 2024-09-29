@@ -92,6 +92,58 @@
               </v-row>
             </v-card-text>
           </v-card>
+
+          <!-- Persistent Portfolio -->
+          <v-card outlined class="mt-6">
+            <v-card-title class="d-flex justify-space-between align-center">
+              <span>Persistent Portfolio</span>
+              <v-btn color="primary" @click="openBuyDialog">
+                <v-icon left>mdi-plus</v-icon>
+                Buy Stock
+              </v-btn>
+            </v-card-title>
+            <v-card-text>
+              <v-data-table
+                :headers="persistentTableHeaders"
+                :items="persistentPortfolioWithTotalValue"
+                :options.sync="persistentTableOptions"
+                @update:options="updatePersistentTableOptions"
+                :items-per-page="persistentTableOptions.itemsPerPage"
+                :page.sync="persistentTableOptions.page"
+                :sort-by="persistentTableOptions.sortBy"
+                :sort-desc="persistentTableOptions.sortDesc"
+                show-headers
+              >
+                <template v-slot:item.stock.symbol="{ item }">
+                  <v-chip v-if="item.stock && item.stock.symbol" :color="getRandomColor(item.stock.symbol)" text-color="white" small>
+                    {{ item.stock.symbol }}
+                  </v-chip>
+                  <span v-else>N/A</span>
+                </template>
+                <template v-slot:item.stock.current_price="{ item }">
+                  ${{ item.stock.current_price.toFixed(2) }}
+                </template>
+                <template v-slot:item.totalValue="{ item }">
+                  ${{ item.totalValue.toFixed(2) }}
+                </template>
+                <template v-slot:item.gain_loss="{ item }">
+                  <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
+                    {{ item.gain_loss >= 0 ? '+' : '-' }}${{ Math.abs(item.gain_loss).toFixed(2) }}
+                  </span>
+                </template>
+                <template v-slot:item.actions="{ item }">
+                  <v-btn small color="primary" @click="openBuyDialog(item)">Buy</v-btn>
+                  <v-btn small color="error" @click="openSellPersistentDialog(item)">Sell</v-btn>
+                </template>
+                <template v-slot:footer>
+                  <v-row class="mt-2 pa-2" align="center" justify="space-between">
+                    <strong>Total Persistent Portfolio Value:</strong>
+                    <span class="text-h5 font-weight-bold">${{ totalPersistentPortfolioValue.toFixed(2) }}</span>
+                  </v-row>
+                </template>
+              </v-data-table>
+            </v-card-text>
+          </v-card>
         </v-card>
       </v-col>
     </v-row>
@@ -127,6 +179,39 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Buy Dialog for Persistent Portfolio -->
+    <v-dialog v-model="buyDialog" max-width="400px">
+      <v-card>
+        <v-card-title>Buy Shares</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <p>Stock: {{ selectedPersistentStock ? selectedPersistentStock.stock.symbol : '' }}</p>
+              <p>Current Price: ${{ selectedPersistentStock ? selectedPersistentStock.stock.current_price : 0 }}</p>
+              <p>Available Moqs: {{ availableMoqs }}</p>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model.number="buyQuantity"
+                label="Number of Shares to Buy"
+                type="number"
+                min="1"
+                :rules="[
+                  v => v > 0 || 'Quantity must be greater than 0',
+                  v => v * (selectedPersistentStock ? selectedPersistentStock.stock.current_price : 0) <= availableMoqs || 'Not enough Moqs'
+                ]"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeBuyDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmBuy">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -159,6 +244,26 @@ export default {
       page: 1,
       itemsPerPage: 10
     },
+    persistentPortfolio: [],
+    persistentTableHeaders: [
+      { title: 'Ticker', align: 'start', value: 'stock.symbol', sortable: true },
+      { title: 'Name', align: 'start', value: 'stock.name', sortable: true },
+      { title: 'Quantity', align: 'end', value: 'quantity', sortable: true },
+      { title: 'Current Price', align: 'end', value: 'stock.current_price', sortable: true },
+      { title: 'Total Value', align: 'end', value: 'totalValue', sortable: true },
+      { title: 'Gain/Loss', align: 'end', value: 'gain_loss', sortable: true },
+      { title: 'Actions', align: 'end', value: 'actions', sortable: false},
+    ],
+    persistentTableOptions: {
+      sortBy: ['stock.symbol'],
+      sortDesc: [false],
+      page: 1,
+      itemsPerPage: 10
+    },
+    buyDialog: false,
+    selectedPersistentStock: null,
+    buyQuantity: 1,
+    availableMoqs: 0,
   }),
   computed: {
     formattedUsername() {
@@ -211,17 +316,33 @@ export default {
     },
     gainLossColor() {
       return this.totalGainLoss >= 0 ? 'green--text' : 'red--text';
-    }
+    },
+    persistentPortfolioWithTotalValue() {
+      return this.persistentPortfolio.map(item => {
+        const totalValue = Number(item.quantity) * Number(item.stock.current_price);
+        const purchaseValue = Number(item.quantity) * Number(item.purchase_price);
+        const gain_loss = totalValue - purchaseValue;
+        return {
+          ...item,
+          totalValue,
+          gain_loss,
+        };
+      });
+    },
+    totalPersistentPortfolioValue() {
+      return this.persistentPortfolioWithTotalValue.reduce((sum, item) => sum + item.totalValue, 0);
+    },
   },
   mounted() {
     this.fetchPortfolio();
+    this.fetchPersistentPortfolio();
     console.log('Headers:', this.table_headers);
   },
   methods: {
     async fetchPortfolio() {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/portfolio/', {
+        const response = await axios.get('http://localhost:8000/api/portfolio/', {
           headers: {
             'Authorization': `Token ${token}`
           }
@@ -252,6 +373,7 @@ export default {
       }
     },
     getRandomColor(symbol) {
+      if (!symbol) return '#000000'; // Default color if symbol is undefined
       const colors = ['primary', 'secondary', 'accent', 'success', 'info', 'warning'];
       const index = symbol.charCodeAt(0) % colors.length;
       return colors[index];
@@ -277,7 +399,7 @@ export default {
 
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('/api/sell/', // Changed from '/api/stocks/sell/'
+        const response = await axios.post('http://localhost:8000/api/sell/', // Changed from '/api/stocks/sell/'
           { 
             symbol: this.selectedStock.stock.symbol,
             quantity: this.sellQuantity
@@ -316,6 +438,92 @@ export default {
     } else {
       return obj[path];
     }
+  },
+  async fetchPersistentPortfolio() {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:8000/api/persistent-portfolio/', {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      console.log('Persistent Portfolio Response:', response.data);  // Add this line for debugging
+      this.persistentPortfolio = response.data.stocks.map(stock => ({
+        ...stock,
+        quantity: Number(stock.quantity),
+        purchase_price: Number(stock.purchase_price),
+        stock: {
+          ...stock.stock,
+          symbol: stock.stock.symbol || 'N/A',
+          current_price: Number(stock.stock.current_price) || 0,
+        }
+      }));
+      this.availableMoqs = Number(response.data.available_moqs);
+      console.log('Processed Persistent Portfolio:', this.persistentPortfolio);  // Add this line for debugging
+    } catch (error) {
+      console.error('Error fetching persistent portfolio:', error);
+      this.$store.commit('setSnackbar', {
+        text: 'Failed to fetch persistent portfolio. Please try again.',
+        color: 'error'
+      });
+    }
+  },
+  updatePersistentTableOptions(options) {
+    this.persistentTableOptions = options;
+  },
+  openBuyDialog(stock = null) {
+    this.selectedPersistentStock = stock;
+    this.buyQuantity = 1;
+    this.buyDialog = true;
+  },
+  closeBuyDialog() {
+    this.buyDialog = false;
+    this.selectedPersistentStock = null;
+    this.buyQuantity = 1;
+  },
+  async confirmBuy() {
+    if (this.buyQuantity <= 0 || this.buyQuantity * this.selectedPersistentStock.stock.current_price > this.availableMoqs) {
+      this.$store.commit('setSnackbar', {
+        text: 'Please enter a valid quantity',
+        color: 'error'
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:8000/api/persistent-portfolio/buy/',
+        { 
+          symbol: this.selectedPersistentStock.stock.symbol,
+          quantity: this.buyQuantity
+        },
+        { 
+          headers: { 
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json',
+          } 
+        }
+      );
+
+      this.$store.commit('setSnackbar', {
+        text: `Successfully bought ${this.buyQuantity} shares of ${this.selectedPersistentStock.stock.symbol}`,
+        color: 'success'
+      });
+
+      this.closeBuyDialog();
+      this.fetchPersistentPortfolio();
+    } catch (error) {
+      console.error('Error buying stock:', error.response ? error.response.data : error);
+      this.$store.commit('setSnackbar', {
+        text: 'Failed to buy stock. Please try again.',
+        color: 'error'
+      });
+    }
+  },
+  openSellPersistentDialog(stock) {
+    this.selectedStock = stock;
+    this.sellQuantity = 1;
+    this.sellDialog = true;
   },
   },
 }

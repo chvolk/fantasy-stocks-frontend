@@ -237,7 +237,7 @@ export default {
       this.loading = true;
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/stocks/available/', {
+        const response = await axios.get('http://localhost:8000/api/stocks/available/', {
           headers: {
             'Authorization': `Token ${token}`
           }
@@ -262,7 +262,7 @@ export default {
     async fetchPortfolio() {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/portfolio/', {
+        const response = await axios.get('http://localhost:8000/api/portfolio/', {
           headers: {
             'Authorization': `Token ${token}`
           }
@@ -309,7 +309,7 @@ export default {
 
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('/api/stocks/draft/', 
+        const response = await axios.post('http://localhost:8000/api/stocks/draft/', 
           { 
             symbol: this.selectedStock.symbol,
             quantity: this.draftQuantity

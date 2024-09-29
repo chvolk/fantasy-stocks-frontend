@@ -92,7 +92,7 @@ export default {
   methods: {
     async fetchLeagues() {
       try {
-        const response = await axios.get('/api/leagues/')
+        const response = await axios.get('http://localhost:8000/leagues/')
         this.leagues = response.data
       } catch (error) {
         console.error('Error fetching leagues:', error)
@@ -100,7 +100,7 @@ export default {
     },
     async createLeague() {
       try {
-        await axios.post('/api/leagues/', this.newLeague)
+        await axios.post('http://localhost:8000/leagues/', this.newLeague)
         this.showCreateLeagueDialog = false
         this.fetchLeagues()
       } catch (error) {
@@ -109,7 +109,7 @@ export default {
     },
     async joinLeague(league) {
       try {
-        await axios.post(`/api/leagues/${league.id}/join/`)
+        await axios.post(`http://localhost:8000/leagues/${league.id}/join/`)
         this.fetchLeagues()
       } catch (error) {
         console.error('Error joining league:', error)
@@ -117,7 +117,7 @@ export default {
     },
     async leaveLeague(league) {
       try {
-        await axios.post(`/api/leagues/${league.id}/leave/`)
+        await axios.post(`http://localhost:8000/leagues/${league.id}/leave/`)
         this.fetchLeagues()
       } catch (error) {
         console.error('Error leaving league:', error)
@@ -125,7 +125,7 @@ export default {
     },
     async fetchLeaderboard() {
       try {
-        const response = await axios.get(`/api/leagues/${this.selectedLeague}/leaderboard/`)
+        const response = await axios.get(`http://localhost:8000/leagues/${this.selectedLeague}/leaderboard/`)
         this.leaderboard = response.data.map((entry, index) => ({
           ...entry,
           rank: index + 1,

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import api from '@/services/api';
 
 const state = {
   token: localStorage.getItem('token') || null,
@@ -13,7 +14,7 @@ const getters = {
 const actions = {
   async loginUser({ commit }, credentials) {
     try {
-      const response = await axios.post('/api/login/', credentials);
+      const response = await api.post('/api/login/', credentials);
       const token = response.data.token;
       localStorage.setItem('token', token);
       commit('setToken', token);
