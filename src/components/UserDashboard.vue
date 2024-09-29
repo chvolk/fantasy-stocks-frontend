@@ -4,7 +4,7 @@
       <v-col cols="12" md="10" lg="8">
         <v-card elevation="12" class="pa-6">
           <v-card-title class="text-h4 font-weight-bold text-center mb-4">
-            {{ formattedUsername }}'s Dashboard
+            {{ formattedUsername }} Dashboard
           </v-card-title>
 
           <v-card outlined>
@@ -211,7 +211,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchPortfolio();
+    await this.fetchPortfolio();
     console.log('Headers:', this.table_headers);
   },
   methods: {
