@@ -242,10 +242,12 @@ export default {
             'Authorization': `Token ${token}`
           }
         });
-        this.availableStocks = response.data.map(stock => ({
-          ...stock,
-          current_price: Number(stock.current_price)
-        }));
+        this.availableStocks = response.data
+          .filter(stock => Number(stock.current_price) > 0)
+          .map(stock => ({
+            ...stock,
+            current_price: Number(stock.current_price)
+          }));
         this.industries = [...new Set(this.availableStocks
           .map(stock => stock.industry)
           .filter(industry => industry)
