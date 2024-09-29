@@ -211,7 +211,7 @@ export default {
     }
   },
   mounted() {
-    await this.fetchPortfolio();
+    this.fetchPortfolio();
     console.log('Headers:', this.table_headers);
   },
   methods: {
