@@ -41,6 +41,9 @@ export default defineConfig({
           });
         },
       }
+    },
+    watch: {
+      ignored: ['**/.git/**']
     }
   },
   base: '/',
