@@ -565,10 +565,6 @@
       closeEditListingDialog() {
         this.editListingDialog = false
       },
-      confirmEditListing() {
-        this.editListingDialog = false
-        this.confirmDialog = false
-      },
       selectPackStock(stock) {
         this.confirmMessage = `Add ${stock.name} (${stock.symbol}) to your inventory? You can only add 1 stock from each pack.`
         this.confirmAction = async () => {
