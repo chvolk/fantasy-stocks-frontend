@@ -237,7 +237,41 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-  
+      
+      <!-- Buy Persistent Stock Dialog -->
+    <v-dialog v-model="buyPersistentDialog" max-width="400px">
+    <v-card>
+        <v-card-title>Buy Persistent Stock</v-card-title>
+        <v-card-text>
+        <v-row>
+            <v-col cols="12">
+            <p>Stock: {{ selectedStock ? selectedStock.name : '' }}</p>
+            <p>Current Price: ${{ selectedStock ? Number(selectedStock.current_price).toFixed(2) : '0.00' }}</p>
+            </v-col>
+            <v-col cols="12">
+            <v-text-field
+                v-model.number="buyQuantity"
+                label="Number of Shares"
+                type="number"
+                min="1"
+                :rules="[v => v > 0 || 'Quantity must be greater than 0']"
+            ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+            <p class="font-weight-bold">Total Cost: ${{ (selectedStock ? selectedStock.current_price * buyQuantity : 0).toFixed(2) }}</p>
+            <p :class="{'error--text': selectedStock && selectedStock.current_price * buyQuantity > availableGains}">
+                Remaining Gains: ${{ (availableGains - (selectedStock ? selectedStock.current_price * buyQuantity : 0)).toFixed(2) }}
+            </p>
+            </v-col>
+        </v-row>
+        </v-card-text>
+        <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" text @click="buyPersistentDialog = false">Cancel</v-btn>
+        <v-btn color="blue darken-1" text @click="confirmBuyPersistentStock" :disabled="!canBuyPersistent">Confirm</v-btn>
+        </v-card-actions>
+    </v-card>
+    </v-dialog>
       <!-- Confirmation Dialogs -->
       <v-dialog v-model="confirmDialog" max-width="300">
         <v-card>
@@ -307,6 +341,9 @@
       packPriceGains: 1000,
       packPriceMoqs: 100,
       inventory: [],
+      buyPersistentDialog: false,
+  buyQuantity: 1,
+  selectedStock: null,
       marketListings: [],
       editListingPrice: 0,
       userListings: [],
@@ -370,6 +407,10 @@
       tradeQuantity: 1,
     }),
     computed: {
+        canBuyPersistent() {
+            return this.buyQuantity > 0 && this.selectedStock && 
+                this.selectedStock.current_price * this.buyQuantity <= this.availableGains;
+        },
       filteredMarketListings() {
         return this.marketListings.filter(listing =>
           listing.symbol.toLowerCase().includes(this.marketSearch.toLowerCase()) ||
@@ -451,32 +492,48 @@
       delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms))
       },
-      buyStock(stock) {
-        this.confirmMessage = `Buy ${stock.name} (${stock.symbol}) for $${stock.current_price}?`
-        this.confirmAction = async () => {
-          try {
-            await this.api.post('http://localhost:8000/api/bazaar/buy-stock/', { symbol: stock.symbol })
-            this.fetchBazaarData()
-            this.confirmDialog = false
-          } catch (error) {
-            console.error('Error buying stock:', error)
-          }
-        }
-        this.confirmDialog = true
-      },
-      sellStock(stock) {
-        this.confirmMessage = `Sell ${stock.name} (${stock.symbol}) for ${stock.current_price} Moqs?`
-        this.confirmAction = async () => {
-          try {
-            await this.api.post('http://localhost:8000/api/bazaar/sell-stock/', { symbol: stock.symbol })
-            this.fetchBazaarData()
-            this.confirmDialog = false
-          } catch (error) {
-            console.error('Error selling stock:', error)
-          }
-        }
-        this.confirmDialog = true
-      },
+      buyPersistentStock(stock) {
+        this.selectedStock = stock;
+        this.buyQuantity = 1;
+        this.buyPersistentDialog = true;
+        },
+        async confirmBuyPersistentStock() {
+            if (this.buyQuantity <= 0) {
+                this.$store.commit('setSnackbar', {
+                text: 'Please enter a valid quantity',
+                color: 'error'
+                });
+                return;
+            }
+
+            const totalCost = this.selectedStock.current_price * this.buyQuantity;
+            if (totalCost > this.availableGains) {
+                this.$store.commit('setSnackbar', {
+                text: 'Insufficient funds to complete this purchase',
+                color: 'error'
+                });
+                return;
+            }
+
+            try {
+                await this.api.post('/api/persistent-portfolio/buy/', {
+                symbol: this.selectedStock.symbol,
+                quantity: this.buyQuantity
+                });
+                this.$store.commit('setSnackbar', {
+                text: `Successfully bought ${this.buyQuantity} shares of ${this.selectedStock.symbol}`,
+                color: 'success'
+                });
+                this.buyPersistentDialog = false;
+                await this.fetchBazaarData();
+            } catch (error) {
+                console.error('Error buying persistent stock:', error);
+                this.$store.commit('setSnackbar', {
+                text: 'Failed to buy stock',
+                color: 'error'
+                });
+            }
+        },
       listStock(stock) {
         this.stockToList = stock;
         this.listingPrice = null;
