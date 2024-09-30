@@ -736,8 +736,8 @@
         this.$store.commit('setSnackbar', {
         text: 'Failed to lock in stock',
       color: 'error'
-        });
-            }
+    });
+        }
       },
       async cancelListing(listing) {
         try {
