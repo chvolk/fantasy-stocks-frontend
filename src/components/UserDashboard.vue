@@ -47,6 +47,7 @@
                   </span>
                 </template>
                 <template v-slot:item.actions="{ item }">
+                  <v-btn small color="success" @click="openBuyDialog(item)">Buy</v-btn>
                   <v-btn small color="error" @click="openSellDialog(item)">Sell</v-btn>
                 </template>
                 <template v-slot:footer>
@@ -132,6 +133,40 @@
         </v-card>
       </v-col>
     </v-row>
+    <!-- Buy Stock Dialog -->
+    <v-dialog v-model="buyDialog" max-width="400px">
+      <v-card>
+        <v-card-title>Buy Shares</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <p>Stock: {{ selectedStock ? selectedStock.stock.name : '' }}</p>
+              <p>Current Price: ${{ selectedStock ? Number(selectedStock.stock.current_price).toFixed(2) : '0.00' }}</p>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model.number="buyQuantity"
+                label="Number of Shares"
+                type="number"
+                min="1"
+                :rules="[v => v > 0 || 'Quantity must be greater than 0']"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <p class="font-weight-bold">Total Cost: ${{ totalCost.toFixed(2) }}</p>
+              <p :class="{'error--text': totalCost > availableBalance}">
+                Remaining Balance: ${{ remainingBalance }}
+              </p>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeBuyDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="confirmBuy" :disabled="!canBuy">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="sellDialog" max-width="400px">
       <v-card>
         <v-card-title>Sell Shares</v-card-title>
@@ -176,6 +211,11 @@ export default {
     portfolio: [],
     balance: 0,
     username: '',
+    buyDialog: false,
+    available_balance: 0,
+    availableBalance: 0,
+    buyQuantity: 1,
+    selectedStock: null,
     available_moqs: 0,
     persistentPortfolio: [],
     initialInvestment: 50000, // Adjust this value as needed
@@ -268,6 +308,18 @@ export default {
     },
     gainLossColor() {
       return this.totalGainLoss >= 0 ? 'green--text' : 'red--text';
+    },
+    totalCost() {
+    if (this.selectedStock && this.buyQuantity > 0) {
+      return Number(this.selectedStock.stock.current_price) * this.buyQuantity;
+    }
+    return 0;
+    },
+    canBuy() {
+      return this.buyQuantity > 0 && this.totalCost <= this.availableBalance;
+    },
+    remainingBalance() {
+      return Number((this.availableBalance - this.totalCost).toFixed(2));
     }
   },
   mounted() {
@@ -294,6 +346,7 @@ export default {
           }
         }));
         this.balance = Number(response.data.balance);
+        this.availableBalance = this.balance;
         this.username = response.data.user;
         this.initialInvestment = Number(response.data.initial_investment);
         
@@ -412,6 +465,54 @@ export default {
       console.error('Error fetching persistent portfolio:', error);
       this.persistentPortfolio = [];
       this.availableMoqs = 0;
+    }
+  },
+  openBuyDialog(stock) {
+    this.selectedStock = stock;
+    this.available_balance = this.balance;
+    this.buyQuantity = 1;
+    this.buyDialog = true;
+  },
+  closeBuyDialog() {
+    this.buyDialog = false;
+    this.selectedStock = null;
+    this.buyQuantity = 1;
+  },
+  async confirmBuy() {
+    if (!this.canBuy) {
+      this.$store.commit('setSnackbar', {
+        text: this.totalCost > this.availableBalance 
+          ? 'Insufficient funds to complete this purchase' 
+          : 'Please enter a valid quantity',
+        color: 'error'
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('/api/stocks/draft/', {
+        symbol: this.selectedStock.stock.symbol,
+        quantity: this.buyQuantity
+      }, {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      
+      this.$store.commit('setSnackbar', {
+        text: `Successfully bought ${this.buyQuantity} shares of ${this.selectedStock.stock.name}`,
+        color: 'success'
+      });
+      
+      this.closeBuyDialog();
+      await this.fetchPortfolio();
+    } catch (error) {
+      console.error('Error buying stock:', error);
+      this.$store.commit('setSnackbar', {
+        text: 'Failed to buy stock. Please try again.',
+        color: 'error'
+      });
     }
   },
   },
