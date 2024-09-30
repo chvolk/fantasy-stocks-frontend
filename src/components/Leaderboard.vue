@@ -8,7 +8,7 @@
           </v-card-title>
 
           <v-tabs v-model="activeTab" centered>
-            <v-tab>Portfolio Value</v-tab>
+            <v-tab>Weekly Portfolio Value</v-tab>
             <v-tab>Total Moqs</v-tab>
           </v-tabs>
 
