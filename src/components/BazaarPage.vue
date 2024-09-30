@@ -466,7 +466,7 @@
     methods: {
       async fetchBazaarData() {
         try {
-          const response = await this.api.get('/api/bazaar/')
+          const response = await this.api.get('/bazaar/')
           this.availableGains = response.data.available_gains
           this.totalMoqs = response.data.total_moqs
           this.inventory = response.data.inventory
@@ -480,7 +480,7 @@
       },
       async fetchPortfolio() {
         const token = localStorage.getItem('token');
-        const response = await this.api.get('/api/portfolio/', {
+        const response = await this.api.get('/portfolio/', {
           headers: {
             'Authorization': `Token ${token}`
           }
@@ -490,7 +490,7 @@
       },
       async buyPack(currency) {
         try {
-          const response = await this.api.post('/api/bazaar/buy-pack/', { currency })
+          const response = await this.api.post('/bazaar/buy-pack/', { currency })
           console.log(response.data)
           this.packDialog = true
           this.packOpeningState = 'selecting'
@@ -556,7 +556,7 @@
             }
 
             try {
-                await this.api.post('/api/persistent-portfolio/buy/', {
+                await this.api.post('/persistent-portfolio/buy/', {
                 symbol: this.selectedStock.symbol,
                 quantity: this.buyQuantity
                 });
@@ -589,7 +589,7 @@
         }
 
         try {
-          const response = await this.api.post('/api/bazaar/list-stock/', {
+          const response = await this.api.post('/bazaar/list-stock/', {
             symbol: this.stockToList.symbol,
             price: this.listingPrice
           });
@@ -611,7 +611,7 @@
         this.confirmMessage = `Buy ${listing.name} (${listing.symbol}) for ${listing.price} Moqs?`
         this.confirmAction = async () => {
           try {
-            await this.api.post('http://localhost:8000/api/bazaar/buy-listed-stock/', { listing_id: listing.id })
+            await this.api.post('http://localhost:8000/bazaar/buy-listed-stock/', { listing_id: listing.id })
             this.fetchBazaarData()
             this.confirmDialog = false
           } catch (error) {
@@ -636,7 +636,7 @@
         }
 
         try {
-          const response = await this.api.put(`/api/bazaar/edit-listing/${this.selectedListing.id}/`, {
+          const response = await this.api.put(`/bazaar/edit-listing/${this.selectedListing.id}/`, {
             price: this.editListingPrice // Use editListingPrice here
           });
           this.$store.commit('setSnackbar', {
@@ -660,7 +660,7 @@
         this.confirmMessage = `Add ${stock.name} (${stock.symbol}) to your inventory? You can only add 1 stock from each pack.`
         this.confirmAction = async () => {
           try {
-            await this.api.post('/api/bazaar/add-to-inventory/', { symbol: stock.symbol })
+            await this.api.post('/bazaar/add-to-inventory/', { symbol: stock.symbol })
             this.fetchBazaarData()
             this.packDialog = false
             this.confirmDialog = false
@@ -693,7 +693,7 @@
     }
 
     try {
-      const response = await this.api.post('/api/persistent-portfolio/sell/', {
+      const response = await this.api.post('/persistent-portfolio/sell/', {
         symbol: this.selectedStock.symbol,
         quantity: this.sellQuantity
       });
@@ -721,7 +721,7 @@
         },
         async confirmLockInStock() {
     try {
-        const response = await this.api.post('/api/persistent-portfolio/lock-in/', {
+        const response = await this.api.post('/persistent-portfolio/lock-in/', {
         symbol: this.selectedStock.symbol,
         quantity: 1
         });
@@ -741,7 +741,7 @@
       },
       async cancelListing(listing) {
         try {
-          const response = await this.api.post('/api/bazaar/cancel-listing/', {
+          const response = await this.api.post('/bazaar/cancel-listing/', {
             listing_id: listing.id
           });
           this.$store.commit('setSnackbar', {
@@ -776,7 +776,7 @@
         console.log('Buy market stock payload:', payload);
 
         try {
-            const response = await this.api.post('/api/bazaar/buy-listed-stock/', payload);
+            const response = await this.api.post('/bazaar/buy-listed-stock/', payload);
             this.$store.commit('setSnackbar', {
             text: 'Stock purchased successfully',
             color: 'success'
