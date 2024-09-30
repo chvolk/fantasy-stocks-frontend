@@ -4,12 +4,12 @@
       <v-col cols="12" md="10" lg="8">
         <v-card elevation="12" class="pa-6">
           <v-card-title class="text-h4 font-weight-bold text-center mb-4">
-            {{ username }}'s Dashboard
+            {{formattedUsername}} Dashboard
           </v-card-title>
 
           <v-card outlined>
             <v-card-title class="d-flex justify-space-between align-center">
-              <span>Your Portfolio</span>
+              <span>Weekly Portfolio</span>
               <v-btn color="primary" to="/draft">
                 <v-icon left>mdi-plus</v-icon>
                 Draft Stocks
@@ -92,6 +92,43 @@
               </v-row>
             </v-card-text>
           </v-card>
+
+          <v-card outlined class="mt-6">
+            <v-card-title>Persistent Portfolio</v-card-title>
+            <v-card-text>
+              <v-data-table
+                :headers="persistentPortfolioHeaders"
+                :items="persistentPortfolio"
+                :options.sync="persistentPortfolioOptions"
+                @update:options="options => persistentPortfolioOptions = options"
+                :items-per-page="persistentPortfolioOptions.itemsPerPage"
+                :page.sync="persistentPortfolioOptions.page"
+                :sort-by="persistentPortfolioOptions.sortBy"
+                :sort-desc="persistentPortfolioOptions.sortDesc"
+                show-headers
+              >
+                <template v-slot:item.symbol="{ item }">
+                  <v-chip :color="getRandomColor(item.symbol)" text-color="white" small>
+                    {{ item.symbol || 'N/A' }}
+                  </v-chip>
+                </template>
+                <template v-slot:item.purchase_price="{ item }">
+                  ${{ item.purchase_price.toFixed(2) }}
+                </template>
+                <template v-slot:item.current_price="{ item }">
+                  ${{ item.current_price.toFixed(2) }}
+                </template>
+                <template v-slot:item.totalValue="{ item }">
+                  ${{ item.totalValue.toFixed(2) }}
+                </template>
+                <template v-slot:item.gain_loss="{ item }">
+                  <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
+                    {{ item.gain_loss >= 0 ? '+' : '-' }}${{ Math.abs(item.gain_loss).toFixed(2) }}
+                  </span>
+                </template>
+              </v-data-table>
+            </v-card-text>
+          </v-card>
         </v-card>
       </v-col>
     </v-row>
@@ -136,6 +173,10 @@ import axios from 'axios'
 export default {
   name: 'UserDashboard',
   data: () => ({  
+    portfolio: [],
+    balance: 0,
+    username: '',
+    initialInvestment: 50000, // Adjust this value as needed
     table_headers: [
       { title: 'Ticker', align: 'start', value: 'stock.symbol', sortable: true },
       { title: 'Name', align: 'start', value: 'stock.name', sortable: true },
@@ -144,17 +185,29 @@ export default {
       { title: 'Current Price', align: 'end', value: 'stock.current_price', sortable: true },
       { title: 'Total Value', align: 'end', value: 'totalValue', sortable: true },
       { title: 'Gain/Loss', align: 'end', value: 'gain_loss', sortable: true },
-      { title: 'Actions', align: 'end', value: 'actions', sortable: false},
+      { title: 'Actions', align: 'center', value: 'actions', sortable: false },
     ],
-    portfolio: [],
+    tableOptions: {
+      sortBy: ['stock.symbol'],
+      sortDesc: [false],
+      page: 1,
+      itemsPerPage: 10
+    },
     sellDialog: false,
     selectedStock: null,
     sellQuantity: 1,
-    balance: 0,
-    username: '',
-    initialInvestment: 50000, // The starting amount
-    tableOptions: {
-      sortBy: ['stock.symbol'],
+    persistentPortfolio: [],
+    persistentPortfolioHeaders: [
+      { title: 'Ticker', align: 'start', value: 'symbol', sortable: true },
+      { title: 'Name', align: 'start', value: 'name', sortable: true },
+      { title: 'Quantity', align: 'end', value: 'quantity', sortable: true },
+      { title: 'Purchase Price', align: 'end', value: 'purchase_price', sortable: true },
+      { title: 'Current Price', align: 'end', value: 'current_price', sortable: true },
+      { title: 'Total Value', align: 'end', value: 'totalValue', sortable: true },
+      { title: 'Gain/Loss', align: 'end', value: 'gain_loss', sortable: true },
+    ],
+    persistentPortfolioOptions: {
+      sortBy: ['symbol'],
       sortDesc: [false],
       page: 1,
       itemsPerPage: 10
@@ -198,7 +251,9 @@ export default {
       return portfolio;
     },
     totalPortfolioValue() {
-      return this.portfolioWithTotalValue.reduce((sum, item) => sum + item.totalValue, 0);
+      const totalValue = this.portfolioWithTotalValue.reduce((sum, item) => sum + item.totalValue, 0);
+      console.log('Total Portfolio Value:', totalValue);
+      return totalValue;
     },
     totalGainLoss() {
       const currentTotalValue = this.totalPortfolioValue + Number(this.balance);
@@ -212,6 +267,7 @@ export default {
   },
   mounted() {
     this.fetchPortfolio();
+    this.fetchPersistentPortfolio();
     console.log('Headers:', this.table_headers);
   },
   methods: {
@@ -234,6 +290,7 @@ export default {
         }));
         this.balance = Number(response.data.balance);
         this.username = response.data.user;
+        this.initialInvestment = Number(response.data.initial_investment);
         
         this.$nextTick(() => {
           this.$forceUpdate();
@@ -248,6 +305,7 @@ export default {
       }
     },
     getRandomColor(symbol) {
+      if (!symbol) return 'grey'; // Default color if symbol is undefined
       const colors = ['primary', 'secondary', 'accent', 'success', 'info', 'warning'];
       const index = symbol.charCodeAt(0) % colors.length;
       return colors[index];
@@ -311,6 +369,51 @@ export default {
       return path.reduce((prev, curr) => prev && prev[curr], obj);
     } else {
       return obj[path];
+    }
+  },
+  async fetchPersistentPortfolio() {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/persistent-portfolio/', {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      
+      console.log('Persistent Portfolio Response:', response.data);
+
+      let portfolioData = response.data;
+
+      // Check if the response is an object with a specific property (e.g., 'stocks')
+      if (typeof response.data === 'object' && !Array.isArray(response.data)) {
+        if (response.data.stocks) {
+          portfolioData = response.data.stocks;
+        } else {
+          // If there's no 'stocks' property, use Object.values to convert to array
+          portfolioData = Object.values(response.data);
+        }
+      }
+
+      // Ensure portfolioData is an array before mapping
+      if (Array.isArray(portfolioData)) {
+        this.persistentPortfolio = portfolioData.map(stock => ({
+          symbol: stock.symbol || 'N/A',
+          name: stock.name || 'Unknown',
+          quantity: Number(stock.quantity) || 0,
+          purchase_price: Number(stock.purchase_price) || 0,
+          current_price: Number(stock.current_price) || 0,
+          totalValue: (Number(stock.quantity) || 0) * (Number(stock.current_price) || 0),
+          gain_loss: ((Number(stock.current_price) || 0) - (Number(stock.purchase_price) || 0)) * (Number(stock.quantity) || 0)
+        }));
+      } else {
+        console.error('Unexpected data structure for persistent portfolio:', portfolioData);
+        this.persistentPortfolio = [];
+      }
+
+      console.log('Processed Persistent Portfolio:', this.persistentPortfolio);
+    } catch (error) {
+      console.error('Error fetching persistent portfolio:', error);
+      this.persistentPortfolio = [];
     }
   },
   },

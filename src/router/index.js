@@ -7,6 +7,7 @@ import LeaguesPage from '@/components/LeaguesPage.vue'
 import LoginPage from '@/components/LoginPage.vue'
 import StockDraft from '@/components/StockDraft.vue'
 import Leaderboard from '@/components/Leaderboard.vue'
+import BazaarPage from '@/components/BazaarPage.vue'
 
 const routes = [
   { path: '/admin', name: 'Admin', beforeEnter: () => { window.location.href = '/admin/' } },
@@ -33,6 +34,11 @@ const routes = [
     name: 'Leaderboard',
     component: Leaderboard
   },
+  { 
+    path: '/bazaar', 
+    component: BazaarPage,
+    meta: { requiresAuth: true }
+  }
 ]
 
 const router = createRouter({
