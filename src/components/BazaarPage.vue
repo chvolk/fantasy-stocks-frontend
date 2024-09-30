@@ -120,15 +120,9 @@
                   <!-- Buy Market Stock Dialog -->
                   <v-dialog v-model="buyMarketDialog" max-width="400px">
                     <v-card>
-                      <v-card-title>Buy {{ selectedMarketStock.symbol }}</v-card-title>
-                      <v-card-text>
-                        <p>Seller: {{ selectedMarketStock.seller }}</p>
-                        <p>Price: {{ selectedMarketStock.price }} MOQs</p>
-                        <v-text-field
-                          v-model="buyMarketQuantity"
-                          label="Quantity"
-                          type="number"
-                        ></v-text-field>
+                      <v-card-title>Buy Market Stock</v-card-title>
+                      <v-card-text v-if="selectedStock">
+                        <p>Are you sure you want to buy {{ selectedStock.symbol }} for {{ selectedStock.price }} Moqs?</p>
                       </v-card-text>
                       <v-card-actions>
                         <v-spacer></v-spacer>
@@ -622,6 +616,45 @@
             color: 'error'
           });
         }
+      },
+      buyMarketStock(item) {
+        this.selectedStock = item;
+        this.buyMarketDialog = true;
+      },
+      async confirmBuyMarketStock() {
+        if (!this.selectedStock) {
+            this.$store.commit('setSnackbar', {
+            text: 'No stock selected',
+            color: 'error'
+            });
+            return;
+        }
+
+        const payload = {
+            listing_id: this.selectedStock.id
+        };
+        console.log('Buy market stock payload:', payload);
+
+        try {
+            const response = await this.api.post('/api/bazaar/buy-listed-stock/', payload);
+            this.$store.commit('setSnackbar', {
+            text: 'Stock purchased successfully',
+            color: 'success'
+            });
+            this.buyMarketDialog = false;
+            await this.fetchBazaarData();
+        } catch (error) {
+            console.error('Error buying market stock:', error.response?.data || error);
+            const errorMessage = error.response?.data?.error || 'Failed to buy stock';
+            this.$store.commit('setSnackbar', {
+            text: errorMessage,
+            color: 'error'
+            });
+        }
+        },
+      closeBuyMarketDialog() {
+        this.buyMarketDialog = false;
+        this.selectedStock = null;
       },
     },
   }
