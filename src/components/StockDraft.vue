@@ -193,28 +193,29 @@ export default {
   }),
   computed: {
     filteredStocks() {
-      let stocks = this.availableStocks.filter(stock => {
-        const matchesIndustry = this.selectedIndustries.length === 0 || 
-          (stock.industry && this.selectedIndustries.includes(stock.industry));
-        const matchesPrice = !this.maxPriceFilter || 
-          (stock.current_price && stock.current_price <= parseFloat(this.maxPriceFilter));
-        return matchesIndustry && matchesPrice;
+    let stocks = this.availableStocks.filter(stock => {
+      const matchesIndustry = this.selectedIndustries.length === 0 || 
+        (stock.industry && this.selectedIndustries.includes(stock.industry));
+      const matchesPrice = !this.maxPriceFilter || 
+        (stock.current_price && stock.current_price <= parseFloat(this.maxPriceFilter));
+      const isValidPrice = stock.current_price && stock.current_price >= 0.01; // New condition
+      return matchesIndustry && matchesPrice && isValidPrice; // Include new condition
+    });
+
+    // Apply sorting
+    if (this.tableOptions && this.tableOptions.sortBy && this.tableOptions.sortBy.length) {
+      const sortBy = this.tableOptions.sortBy[0];
+      const sortDesc = this.tableOptions.sortDesc ? this.tableOptions.sortDesc[0] : false;
+      stocks = stocks.sort((a, b) => {
+        let comparison = 0;
+        if (a[sortBy] < b[sortBy]) comparison = -1;
+        if (a[sortBy] > b[sortBy]) comparison = 1;
+        return sortDesc ? -comparison : comparison;
       });
+    }
 
-      // Apply sorting
-      if (this.tableOptions && this.tableOptions.sortBy && this.tableOptions.sortBy.length) {
-        const sortBy = this.tableOptions.sortBy[0];
-        const sortDesc = this.tableOptions.sortDesc ? this.tableOptions.sortDesc[0] : false;
-        stocks = stocks.sort((a, b) => {
-          let comparison = 0;
-          if (a[sortBy] < b[sortBy]) comparison = -1;
-          if (a[sortBy] > b[sortBy]) comparison = 1;
-          return sortDesc ? -comparison : comparison;
-        });
-      }
-
-      return stocks;
-    },
+    return stocks;
+  },
     formattedBalance() {
       return typeof this.balance === 'number' ? this.balance.toFixed(2) : '0.00'
     },
