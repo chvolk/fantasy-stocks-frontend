@@ -284,6 +284,40 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- Sell Persistent Stock Dialog -->
+    <v-dialog v-model="sellPersistentDialog" max-width="400px">
+    <v-card>
+        <v-card-title>Sell Persistent Stock</v-card-title>
+        <v-card-text>
+        <v-row>
+            <v-col cols="12">
+            <p>Stock: {{ selectedStock ? selectedStock.name : '' }}</p>
+            <p>Current Price: ${{ selectedStock ? Number(selectedStock.current_price).toFixed(2) : '0.00' }}</p>
+            <p>Available Quantity: {{ selectedStock ? selectedStock.quantity : 0 }}</p>
+            </v-col>
+            <v-col cols="12">
+            <v-text-field
+                v-model.number="sellQuantity"
+                label="Number of Shares to Sell"
+                type="number"
+                min="1"
+                :max="selectedStock ? selectedStock.quantity : 0"
+                :rules="[v => v > 0 || 'Quantity must be greater than 0', v => v <= (selectedStock ? selectedStock.quantity : 0) || 'Cannot sell more than you own']"
+            ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+            <p class="font-weight-bold">Total Moqs to Receive: {{ (selectedStock ? selectedStock.current_price * sellQuantity : 0).toFixed(2) }}</p>
+            </v-col>
+        </v-row>
+        </v-card-text>
+        <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" text @click="sellPersistentDialog = false">Cancel</v-btn>
+        <v-btn color="blue darken-1" text @click="confirmSellPersistentStock" :disabled="!canSellPersistent">Confirm</v-btn>
+        </v-card-actions>
+    </v-card>
+    </v-dialog>
   
       <!-- Add this dialog for listing a stock -->
       <v-dialog v-model="listingDialog" max-width="400px">
@@ -355,6 +389,8 @@
       buyMarketDialog: false,
       packStocks: [],
       visiblePackStocks: [],
+      sellPersistentDialog: false,
+      sellQuantity: 1,
       confirmDialog: false,
       buyMarketDialog: false,
       editListingDialog: false,
@@ -418,6 +454,10 @@
           listing.industry.toLowerCase().includes(this.marketSearch.toLowerCase())
         )
       },
+      canSellPersistent() {
+      return this.sellQuantity > 0 && this.selectedStock && 
+           this.sellQuantity <= this.selectedStock.quantity;
+  }
     },
     mounted() {
       this.fetchBazaarData()
@@ -636,6 +676,42 @@
           spread: 70,
           origin: { y: 0.6 }
         })
+      },
+      sellPersistentStock(stock) {
+    this.selectedStock = stock;
+    this.sellQuantity = 1;
+    this.sellPersistentDialog = true;
+  },
+
+  async confirmSellPersistentStock() {
+    if (!this.canSellPersistent) {
+      this.$store.commit('setSnackbar', {
+        text: 'Invalid sell quantity',
+        color: 'error'
+      });
+      return;
+    }
+
+    try {
+      const response = await this.api.post('/api/persistent-portfolio/sell/', {
+        symbol: this.selectedStock.symbol,
+        quantity: this.sellQuantity
+      });
+      
+      this.$store.commit('setSnackbar', {
+        text: `Successfully sold ${this.sellQuantity} shares of ${this.selectedStock.symbol} for ${response.data.moqs_received} Moqs`,
+        color: 'success'
+      });
+      
+      this.sellPersistentDialog = false;
+      await this.fetchBazaarData();
+    } catch (error) {
+      console.error('Error selling persistent stock:', error);
+      this.$store.commit('setSnackbar', {
+        text: 'Failed to sell stock',
+        color: 'error'
+      });
+        }
       },
       async lockInStock(stock) {
         try {
