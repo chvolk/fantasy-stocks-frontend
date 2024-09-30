@@ -382,31 +382,18 @@ export default {
       
       console.log('Persistent Portfolio Response:', response.data);
 
-      let portfolioData = response.data;
-
-      // Check if the response is an object with a specific property (e.g., 'stocks')
-      if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-        if (response.data.stocks) {
-          portfolioData = response.data.stocks;
-        } else {
-          // If there's no 'stocks' property, use Object.values to convert to array
-          portfolioData = Object.values(response.data);
-        }
-      }
-
-      // Ensure portfolioData is an array before mapping
-      if (Array.isArray(portfolioData)) {
-        this.persistentPortfolio = portfolioData.map(stock => ({
-          symbol: stock.symbol || 'N/A',
-          name: stock.name || 'Unknown',
-          quantity: Number(stock.quantity) || 0,
-          purchase_price: Number(stock.purchase_price) || 0,
-          current_price: Number(stock.current_price) || 0,
-          totalValue: (Number(stock.quantity) || 0) * (Number(stock.current_price) || 0),
-          gain_loss: ((Number(stock.current_price) || 0) - (Number(stock.purchase_price) || 0)) * (Number(stock.quantity) || 0)
+      if (response.data && Array.isArray(response.data.stocks)) {
+        this.persistentPortfolio = response.data.stocks.map(item => ({
+          symbol: item.stock.symbol,
+          name: item.stock.name,
+          quantity: Number(item.quantity),
+          purchase_price: Number(item.purchase_price),
+          current_price: Number(item.stock.current_price),
+          totalValue: Number(item.quantity) * Number(item.stock.current_price),
+          gain_loss: (Number(item.stock.current_price) - Number(item.purchase_price)) * Number(item.quantity)
         }));
       } else {
-        console.error('Unexpected data structure for persistent portfolio:', portfolioData);
+        console.error('Unexpected data structure for persistent portfolio:', response.data);
         this.persistentPortfolio = [];
       }
 

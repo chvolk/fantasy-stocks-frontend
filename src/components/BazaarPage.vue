@@ -54,46 +54,21 @@
             <!-- Bazaar -->
             <v-card outlined>
               <v-tabs v-model="bazaarTab">
-                <v-tab>Market</v-tab>
-                <v-tab>Your Listings</v-tab>
+                <v-tab value="inventory">Inventory</v-tab>
+                <v-tab value="market">Market</v-tab>
+                <v-tab value="myListings">My Listings</v-tab>
               </v-tabs>
-              <v-tabs-items v-model="bazaarTab">
-                <v-tab-item>
-                  <!-- Market Tab -->
-                  <v-card flat>
-                    <v-card-text>
-                      <v-text-field v-model="marketSearch" label="Search" prepend-icon="mdi-magnify"></v-text-field>
-                      <v-data-table
-                        :headers="marketHeaders"
-                        :items="filteredMarketListings"
-                        :items-per-page="5"
-                        class="elevation-1"
-                      >
-                        <template v-slot:item.actions="{ item }">
-                          <v-btn small color="primary" @click="buyListedStock(item)">Buy</v-btn>
-                        </template>
-                      </v-data-table>
-                    </v-card-text>
-                  </v-card>
-                </v-tab-item>
-                <v-tab-item>
-                  <!-- Your Listings Tab -->
-                  <v-card flat>
-                    <v-card-text>
-                      <v-data-table
-                        :headers="listingsHeaders"
-                        :items="userListings"
-                        :items-per-page="5"
-                        class="elevation-1"
-                      >
-                        <template v-slot:item.actions="{ item }">
-                          <v-btn small color="primary" @click="editListing(item)">Edit</v-btn>
-                        </template>
-                      </v-data-table>
-                    </v-card-text>
-                  </v-card>
-                </v-tab-item>
-              </v-tabs-items>
+              <v-window v-model="bazaarTab">
+                <v-window-item value="inventory">
+                  <!-- Inventory content -->
+                </v-window-item>
+                <v-window-item value="market">
+                  <!-- Market content -->
+                </v-window-item>
+                <v-window-item value="myListings">
+                  <!-- My Listings content -->
+                </v-window-item>
+              </v-window>
             </v-card>
           </v-card>
         </v-col>
@@ -170,8 +145,13 @@
   <script>
   import { inject } from 'vue'
   import confetti from 'canvas-confetti'
+  import { VTabs, VTab, VListItem } from 'vuetify/components'
   export default {
     name: 'BazaarPage',
+    components: {
+      VTabs,
+      VTab
+    },
     setup() {
       const api = inject('api')
       return { api }
@@ -251,31 +231,40 @@
       async buyPack(currency) {
         try {
           const response = await this.api.post('/api/bazaar/buy-pack/', { currency })
-          
+          console.log(response.data)
           this.packDialog = true
           this.packOpeningState = 'selecting'
           this.selectedIndustry = null
           this.packStocks = []
           this.visiblePackStocks = []
 
+          // Delay to simulate "selecting" state
           await this.delay(2000)
+
+          // Reveal the industry
           this.selectedIndustry = response.data.industry
           this.packOpeningState = 'revealing'
 
+          // Trigger confetti after revealing the industry
           this.triggerConfetti()
 
+          // Delay before starting to reveal stocks
           await this.delay(1500)
 
+          // Store all stocks from the response
           this.packStocks = response.data.stocks
-          
+          console.log(this.packStocks)
+          // Reveal stocks one by one
           for (const stock of this.packStocks) {
-            await this.delay(500)
+            await this.delay(500) // Delay between each stock reveal
             this.visiblePackStocks.push(stock)
           }
 
+          // All stocks revealed
           this.packOpeningState = 'revealed'
-
-          this.fetchBazaarData()
+          
+          // Refresh bazaar data after buying a pack
+          await this.fetchBazaarData()
         } catch (error) {
           console.error('Error buying pack:', error)
         }
