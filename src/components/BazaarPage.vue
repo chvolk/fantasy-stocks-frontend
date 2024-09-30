@@ -713,25 +713,32 @@
       });
         }
       },
-      async lockInStock(stock) {
-        try {
-            const response = await this.api.post('/api/persistent-portfolio/lock-in/', {
-            symbol: stock.symbol,
-            quantity: 1
-            });
-            this.$store.commit('setSnackbar', {
-            text: 'Stock locked in successfully',
-            color: 'success'
-            });
-            await this.fetchBazaarData();
-        } catch (error) {
-            console.error('Error locking in stock:', error);
-            this.$store.commit('setSnackbar', {
-            text: 'Failed to lock in stock',
-            color: 'error'
-            });
-        }
+      lockInStock(stock) {
+        this.selectedStock = stock;
+        this.confirmMessage = `Are you sure you want to lock in 1 share of ${stock.name} (${stock.symbol})?`;
+        this.confirmAction = this.confirmLockInStock;
+        this.confirmDialog = true;
         },
+        async confirmLockInStock() {
+    try {
+        const response = await this.api.post('/api/persistent-portfolio/lock-in/', {
+        symbol: this.selectedStock.symbol,
+        quantity: 1
+        });
+        this.$store.commit('setSnackbar', {
+        text: 'Stock locked in successfully',
+        color: 'success'
+        });
+        this.confirmDialog = false;
+        await this.fetchBazaarData();
+    } catch (error) {
+        console.error('Error locking in stock:', error);
+        this.$store.commit('setSnackbar', {
+        text: 'Failed to lock in stock',
+      color: 'error'
+        });
+            }
+      },
       async cancelListing(listing) {
         try {
           const response = await this.api.post('/api/bazaar/cancel-listing/', {
