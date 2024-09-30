@@ -176,6 +176,8 @@ export default {
     portfolio: [],
     balance: 0,
     username: '',
+    available_moqs: 0,
+    persistentPortfolio: [],
     initialInvestment: 50000, // Adjust this value as needed
     table_headers: [
       { title: 'Ticker', align: 'start', value: 'stock.symbol', sortable: true },
@@ -251,7 +253,10 @@ export default {
       return portfolio;
     },
     totalPortfolioValue() {
-      const totalValue = this.portfolioWithTotalValue.reduce((sum, item) => sum + item.totalValue, 0);
+      const totalValue = this.portfolioWithTotalValue.reduce((sum, item) => {
+        // Use full precision for calculation
+        return sum + (Number(item.quantity) * Number(item.stock.current_price));
+      }, 0);
       console.log('Total Portfolio Value:', totalValue);
       return totalValue;
     },
@@ -384,23 +389,29 @@ export default {
 
       if (response.data && Array.isArray(response.data.stocks)) {
         this.persistentPortfolio = response.data.stocks.map(item => ({
-          symbol: item.stock.symbol,
-          name: item.stock.name,
+          symbol: item.symbol,
+          name: item.name,
           quantity: Number(item.quantity),
           purchase_price: Number(item.purchase_price),
-          current_price: Number(item.stock.current_price),
-          totalValue: Number(item.quantity) * Number(item.stock.current_price),
-          gain_loss: (Number(item.stock.current_price) - Number(item.purchase_price)) * Number(item.quantity)
+          current_price: Number(item.current_price),
+          totalValue: Number(item.quantity) * Number(item.current_price),
+          gain_loss: (Number(item.current_price) - Number(item.purchase_price)) * Number(item.quantity)
         }));
+        
+        // Store available_moqs if needed
+        this.availableMoqs = response.data.available_moqs;
       } else {
         console.error('Unexpected data structure for persistent portfolio:', response.data);
         this.persistentPortfolio = [];
+        this.availableMoqs = 0;
       }
 
       console.log('Processed Persistent Portfolio:', this.persistentPortfolio);
+      console.log('Available MOQs:', this.availableMoqs);
     } catch (error) {
       console.error('Error fetching persistent portfolio:', error);
       this.persistentPortfolio = [];
+      this.availableMoqs = 0;
     }
   },
   },
