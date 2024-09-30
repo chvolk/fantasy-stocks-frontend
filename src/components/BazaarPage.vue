@@ -168,14 +168,13 @@
   </template>
   
   <script>
-  import { getCurrentInstance } from 'vue'
+  import { inject } from 'vue'
   import confetti from 'canvas-confetti'
-  
   export default {
     name: 'BazaarPage',
     setup() {
-      const { proxy } = getCurrentInstance()
-      return { proxy }
+      const api = inject('api')
+      return { api }
     },
     data: () => ({
       availableGains: 0,
@@ -239,7 +238,7 @@
     methods: {
       async fetchBazaarData() {
         try {
-          const response = await this.proxy.$api.get('/api/bazaar/')
+          const response = await this.api.get('/api/bazaar/')
           this.availableGains = response.data.available_gains
           this.totalMoqs = response.data.total_moqs
           this.inventory = response.data.inventory
@@ -251,7 +250,7 @@
       },
       async buyPack(currency) {
         try {
-          const response = await this.proxy.$api.post('/api/bazaar/buy-pack/', { currency })
+          const response = await this.api.post('/api/bazaar/buy-pack/', { currency })
           
           this.packDialog = true
           this.packOpeningState = 'selecting'
