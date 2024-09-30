@@ -151,7 +151,7 @@
                       <v-btn
                         small
                         color="error"
-                        @click="removeListing(item)"
+                        @click="cancelListing(item)"
                       >
                         Remove
                       </v-btn>
