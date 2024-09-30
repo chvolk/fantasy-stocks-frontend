@@ -110,6 +110,7 @@
                         small
                         color="success"
                         @click="buyMarketStock(item)"
+                        :disabled="username === item.seller"
                       >
                         Buy
                       </v-btn>
@@ -324,6 +325,7 @@
       visiblePackStocks: [],
       confirmDialog: false,
       buyMarketDialog: false,
+      username: '',
       confirmMessage: '',
       confirmAction: () => {},
       packOpeningState: 'idle',
@@ -382,6 +384,7 @@
     },
     mounted() {
       this.fetchBazaarData()
+      this.fetchPortfolio()
     },
     methods: {
       async fetchBazaarData() {
@@ -397,6 +400,16 @@
         } catch (error) {
           console.error('Error fetching bazaar data:', error)
         }
+      },
+      async fetchPortfolio() {
+        const token = localStorage.getItem('token');
+        const response = await this.api.get('/api/portfolio/', {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        this.username = response.data.user;
+        
       },
       async buyPack(currency) {
         try {
