@@ -241,14 +241,14 @@
 
     <!-- Sell Persistent Stock Dialog -->
     <v-dialog v-model="sellPersistentDialog" max-width="400px">
-  <v-card>
+  <v-card v-if="selectedStock">
     <v-card-title>Sell Persistent Stock</v-card-title>
     <v-card-text>
       <v-row>
         <v-col cols="12">
-          <p>Stock: {{ selectedStock ? selectedStock.stock.name : '' }}</p>
-          <p>Current Price: ${{ selectedStock ? Number(selectedStock.stock.current_price).toFixed(2) : '0.00' }}</p>
-          <p>Available Quantity: {{ selectedStock ? selectedStock.quantity : 0 }}</p>
+          <p>Stock: {{ selectedStock.name }}</p>
+          <p>Current Price: ${{ Number(selectedStock.current_price).toFixed(2) }}</p>
+          <p>Available Quantity: {{ selectedStock.quantity }}</p>
         </v-col>
         <v-col cols="12">
           <v-text-field
@@ -256,12 +256,12 @@
             label="Number of Shares to Sell"
             type="number"
             min="1"
-            :max="selectedStock ? selectedStock.quantity : 0"
-            :rules="[v => v > 0 || 'Quantity must be greater than 0', v => v <= (selectedStock ? selectedStock.quantity : 0) || 'Cannot sell more than you own']"
+            :max="selectedStock.quantity"
+            :rules="[v => v > 0 || 'Quantity must be greater than 0', v => v <= selectedStock.quantity || 'Cannot sell more than you own']"
           ></v-text-field>
         </v-col>
         <v-col cols="12">
-          <p class="font-weight-bold">Total MOQs to Receive: {{ (selectedStock ? selectedStock.stock.current_price * sellQuantity : 0).toFixed(2) }}</p>
+          <p class="font-weight-bold">Estimated MOQs to Receive: {{ (selectedStock.stock.current_price * sellQuantity).toFixed(2) }}</p>
         </v-col>
       </v-row>
     </v-card-text>
@@ -272,6 +272,7 @@
     </v-card-actions>
   </v-card>
 </v-dialog>
+
     <v-dialog v-model="sellDialog" max-width="400px">
       <v-card>
         <v-card-title>Sell Shares</v-card-title>
@@ -321,7 +322,6 @@ export default {
     availableBalance: 0,
     persistentTotalValue: 0,
     persistentGainLoss: 0,
-    availableGains: 0,
     availableMoqs: 0,
     buyQuantity: 1,
     selectedStock: null,
@@ -663,7 +663,14 @@ export default {
     this.buyPersistentDialog = true;
   },
   sellPersistentStock(stock) {
-    this.selectedStock = stock;
+    this.selectedStock = {
+      stock: {
+        name: stock.name,
+        symbol: stock.symbol,
+        current_price: stock.current_price
+      },
+      quantity: stock.quantity
+    };
     this.sellQuantity = 1;
     this.sellPersistentDialog = true;
   },
@@ -695,9 +702,14 @@ export default {
   },
   async confirmSellPersistent() {
     try {
-      const response = await this.api.post('/api/persistent-portfolio/sell/', {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('/api/persistent-portfolio/sell/', {
         symbol: this.selectedStock.stock.symbol,
         quantity: this.sellQuantity
+      }, {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
       });
       this.$store.commit('setSnackbar', {
         text: `Successfully sold ${this.sellQuantity} shares of ${this.selectedStock.stock.name}`,
