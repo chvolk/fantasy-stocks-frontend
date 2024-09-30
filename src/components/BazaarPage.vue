@@ -192,7 +192,7 @@
       <!-- Pack Opening Dialog -->
       <v-dialog v-model="packDialog" max-width="600px" persistent>
         <v-card>
-          <v-card-title class="text-h5">Pack Opening</v-card-title>
+          <v-card-title class="text-h5" style="text-align: center;">Pack Opening!</v-card-title>
           <v-card-text>
             <v-container v-if="packOpeningState === 'selecting'">
               <v-row justify="center">
@@ -204,7 +204,7 @@
                 ></v-progress-circular>
               </v-row>
               <v-row justify="center" class="mt-4">
-                <span class="text-h6">Selecting Industry...</span>
+                <span class="text-h6" style="text-align: center;">Selecting Industry...</span>
                 </br>
                 <v-spacer class="my-4"></v-spacer>
               </v-row>
@@ -314,6 +314,7 @@
       packPriceMoqs: 100,
       inventory: [],
       marketListings: [],
+      editListingPrice: 0,
       userListings: [],
       persistentPortfolio: [],
       bazaarTab: null,
@@ -325,6 +326,7 @@
       visiblePackStocks: [],
       confirmDialog: false,
       buyMarketDialog: false,
+      editListingDialog: false,
       username: '',
       confirmMessage: '',
       confirmAction: () => {},
@@ -528,8 +530,44 @@
         this.confirmDialog = true
       },
       editListing(listing) {
-        // Open a dialog to edit listing price
-        // Then call API to update the listing
+        this.editListingDialog = true;
+        this.selectedListing = listing;
+        this.editListingPrice = listing.price; // Pre-fill the price field
+      },
+      async confirmEditListing() {
+        if (!this.editListingPrice || this.editListingPrice <= 1) {
+          this.$store.commit('setSnackbar', {
+            text: 'Please enter a valid price',
+            color: 'error'
+          });
+          console.log(this.editListingPrice)
+          return;
+        }
+
+        try {
+          const response = await this.api.put(`/api/bazaar/edit-listing/${this.selectedListing.id}/`, {
+            price: this.editListingPrice // Use editListingPrice here
+          });
+          this.$store.commit('setSnackbar', {
+            text: 'Listing updated successfully',
+            color: 'success'
+          });
+          this.editListingDialog = false;
+          await this.fetchBazaarData();
+        } catch (error) {
+          console.error('Error editing listing:', error);
+          this.$store.commit('setSnackbar', {
+            text: 'Failed to update listing',
+            color: 'error'
+          });
+        }
+      },
+      closeEditListingDialog() {
+        this.editListingDialog = false
+      },
+      confirmEditListing() {
+        this.editListingDialog = false
+        this.confirmDialog = false
       },
       selectPackStock(stock) {
         this.confirmMessage = `Add ${stock.name} (${stock.symbol}) to your inventory? You can only add 1 stock from each pack.`
