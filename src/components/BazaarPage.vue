@@ -110,6 +110,7 @@
                         small
                         color="success"
                         @click="buyMarketStock(item)"
+                        :disabled="username === item.seller"
                       >
                         Buy
                       </v-btn>
@@ -322,6 +323,7 @@
       buyMarketDialog: false,
       packStocks: [],
       visiblePackStocks: [],
+      username: '',
       confirmDialog: false,
       buyMarketDialog: false,
       confirmMessage: '',
@@ -337,7 +339,6 @@
       marketHeaders: [
         { title: 'Symbol', value: 'symbol' },
         { title: 'Name', value: 'name' },
-        { title: 'Industry', value: 'industry' },
         { title: 'Price (Moqs)', value: 'price' },
         { title: 'Seller', value: 'seller' },
         { title: 'Actions', value: 'actions', sortable: false },
@@ -384,6 +385,7 @@
     },
     mounted() {
       this.fetchBazaarData()
+      this.fetchPortfolio()
     },
     methods: {
       async fetchBazaarData() {
@@ -464,7 +466,7 @@
             }
         }
         this.confirmDialog = true
-      },
+        },
       buyStock(stock) {
         this.confirmMessage = `Buy ${stock.name} (${stock.symbol}) for $${stock.current_price}?`
         this.confirmAction = async () => {
@@ -491,10 +493,42 @@
         }
         this.confirmDialog = true
       },
+      removeListing(listing) {
+        this.confirmMessage = `Remove listing for ${listing.name} (${listing.symbol})?`
+        this.confirmAction = async () => {
+            try {
+            const response = await this.api.delete(`/api/bazaar/remove-listing/${listing.symbol}/`)
+            this.$store.commit('setSnackbar', {
+                text: 'Listing removed successfully',
+                color: 'success'
+            });
+            await this.fetchBazaarData()
+            this.confirmDialog = false
+            } catch (error) {
+            console.error('Error removing listing:', error)
+            const errorMessage = error.response?.data?.error || 'Failed to remove listing'
+            this.$store.commit('setSnackbar', {
+                text: errorMessage,
+                color: 'error'
+            });
+            }
+        }
+        this.confirmDialog = true
+        },
       listStock(stock) {
         this.stockToList = stock;
         this.listingPrice = null;
         this.listingDialog = true;
+      },
+      async fetchPortfolio() {
+        const token = localStorage.getItem('token');
+        const response = await this.api.get('/api/portfolio/', {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        this.username = response.data.user;
+        console.log(this.username)
       },
       async confirmListStock() {
         if (!this.listingPrice || this.listingPrice <= 0) {
