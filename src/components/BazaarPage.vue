@@ -164,20 +164,20 @@
                   </v-data-table>
 
                   <!-- Edit Listing Dialog -->
-                  <v-dialog v-model="editListingDialog" max-width="400px">
+                  <v-dialog v-model="editListingDialog" max-width="500px">
                     <v-card>
-                      <v-card-title>Edit Listing for {{ selectedListing.symbol }}</v-card-title>
+                      <v-card-title>Edit Listing</v-card-title>
                       <v-card-text>
                         <v-text-field
-                          v-model="editListingPrice"
-                          label="Price (MOQs)"
+                          v-model="editingListing.price"
+                          label="New Price"
                           type="number"
                         ></v-text-field>
                       </v-card-text>
                       <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn color="blue darken-1" text @click="closeEditListingDialog">Cancel</v-btn>
-                        <v-btn color="blue darken-1" text @click="confirmEditListing">Confirm</v-btn>
+                        <v-btn color="blue darken-1" text @click="editListingDialog = false">Cancel</v-btn>
+                        <v-btn color="blue darken-1" text @click="saveEditedListing">Save</v-btn>
                       </v-card-actions>
                     </v-card>
                   </v-dialog>
@@ -369,6 +369,8 @@
       tradeDialog: false,
       selectedStock: null,
       tradeAction: '',
+      editListingDialog: false,
+      editingListing: null,
       tradeQuantity: 1,
     }),
     computed: {
@@ -409,7 +411,7 @@
           this.visiblePackStocks = []
 
           // Delay to simulate "selecting" state
-          await this.delay(2000)
+          await this.delay(1400)
 
           // Reveal the industry
           this.selectedIndustry = response.data.industry
@@ -441,6 +443,27 @@
       },
       delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms))
+      },
+      buyMarketStock(listing) {
+        this.confirmMessage = `Buy ${listing.name} (${listing.symbol}) for ${listing.price} Moqs?`
+        this.confirmAction = async () => {
+            try {
+            await this.api.post('/api/bazaar/buy-listed-stock/', { listing_id: listing.id })
+            this.$store.commit('setSnackbar', {
+                text: 'Stock bought successfully',
+                color: 'success'
+            });
+            await this.fetchBazaarData()
+            this.confirmDialog = false
+            } catch (error) {
+            console.error('Error buying listed stock:', error)
+            this.$store.commit('setSnackbar', {
+                text: 'Failed to buy stock',
+                color: 'error'
+            });
+            }
+        }
+        this.confirmDialog = true
       },
       buyStock(stock) {
         this.confirmMessage = `Buy ${stock.name} (${stock.symbol}) for $${stock.current_price}?`
@@ -515,9 +538,28 @@
         this.confirmDialog = true
       },
       editListing(listing) {
-        // Open a dialog to edit listing price
-        // Then call API to update the listing
+        this.editingListing = { ...listing };
+        this.editListingDialog = true;
       },
+      async saveEditedListing() {
+        try {
+            const response = await this.api.put(`/api/bazaar/edit-listing/${this.editingListing.id}/`, {
+            price: this.editingListing.price
+            });
+            this.$store.commit('setSnackbar', {
+            text: 'Listing updated successfully',
+            color: 'success'
+            });
+            this.editListingDialog = false;
+            await this.fetchBazaarData();
+        } catch (error) {
+            console.error('Error updating listing:', error);
+            this.$store.commit('setSnackbar', {
+            text: 'Failed to update listing',
+            color: 'error'
+            });
+        }
+        },
       selectPackStock(stock) {
         this.confirmMessage = `Add ${stock.name} (${stock.symbol}) to your inventory? You can only add 1 stock from each pack.`
         this.confirmAction = async () => {
