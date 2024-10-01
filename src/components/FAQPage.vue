@@ -66,7 +66,6 @@ export default {
               <li>The Moq leaderboard displays players with the highest total Moqs.</li>
               <li>Total Moqs are calculated as (persistent portfolio value + total Moqs).</li>
             </ul>
-            <p>Aim for the top, cowboy! Your name could be shining brighter than a desert star on these boards.</p>
           `
         }
       ]
