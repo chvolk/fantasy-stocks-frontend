@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer" app>
+    <v-navigation-drawer v-model="drawer" app v-if="isAuthenticated" temporary>
       <v-list>
         <v-list-item to="/dashboard">
           <template v-slot:prepend>
@@ -64,20 +64,20 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <template v-if="isAuthenticated">
-        <v-btn icon to="/dashboard">
+        <v-btn icon to="/dashboard" v-tooltip="'Dashboard'">
           <v-icon>mdi-view-dashboard</v-icon>
         </v-btn>
-        <v-btn icon to="/leaderboard">
+
+        <v-btn icon to="/leaderboard" v-tooltip="'Leaderboard'">
           <v-icon>mdi-trophy</v-icon>
         </v-btn>
-        <v-btn icon to="/draft">
+
+        <v-btn icon to="/draft" v-tooltip="'Draft Stocks'">
           <v-icon>mdi-chart-line</v-icon>
         </v-btn>
-        <v-btn icon to="/bazaar">
+
+        <v-btn icon to="/bazaar" v-tooltip="'Bazaar'">
           <v-icon>mdi-store</v-icon>
-        </v-btn>
-        <v-btn icon @click="signOut" v-if="isAuthenticated">
-          <v-icon>mdi-logout</v-icon>
         </v-btn>
       </template>
     </v-app-bar>
