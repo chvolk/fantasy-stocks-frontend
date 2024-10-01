@@ -957,7 +957,7 @@
   }
   
   .market_tab {
-    background-color: #2dca6f;
+    background-color: #0e7de6;
     color: #ffffff;
   }
   .listing_tab {
