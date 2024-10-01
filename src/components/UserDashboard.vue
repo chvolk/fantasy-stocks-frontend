@@ -419,13 +419,10 @@ export default {
       return totalValue;
     },
     totalGainLoss() {
-      const currentTotalValue = this.totalPortfolioValue + Number(this.balance);
-      const gainLoss = currentTotalValue - this.initialInvestment;
-      
-      return gainLoss;
+      return this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment);
     },
     gainLossColor() {
-      return this.totalGainLoss >= 0 ? 'green--text' : 'red--text';
+      return this.totalGainLoss > -.01 ? 'green--text' : 'red--text';
     },
     totalCost() {
     if (this.selectedStock && this.buyQuantity > 0) {
@@ -642,6 +639,8 @@ export default {
       
       this.closeBuyDialog();
       await this.fetchPortfolio();
+      // this.totalGainLoss = response.data.total_gain_loss;
+      console.log('Total Gain/Loss:', this.totalGainLoss);
     } catch (error) {
       console.error('Error buying stock:', error);
       this.$store.commit('setSnackbar', {
