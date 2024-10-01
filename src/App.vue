@@ -26,6 +26,13 @@
           </template>
           <v-list-item-title>Bazaar</v-list-item-title>
         </v-list-item>
+        <v-list-item @click="signOut">
+          <template v-slot:prepend>
+            <v-icon>mdi-logout</v-icon>
+          </template>
+          
+          <v-list-item-title>Logout</v-list-item-title>
+        </v-list-item>
         <v-spacer></v-spacer>
       </v-list>
 
@@ -68,6 +75,9 @@
         </v-btn>
         <v-btn icon to="/bazaar">
           <v-icon>mdi-store</v-icon>
+        </v-btn>
+        <v-btn icon @click="signOut" v-if="isAuthenticated">
+          <v-icon>mdi-logout</v-icon>
         </v-btn>
       </template>
     </v-app-bar>
