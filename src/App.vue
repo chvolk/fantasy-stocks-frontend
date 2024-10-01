@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer" app temporary v-if="isAuthenticated">
+    <v-navigation-drawer v-model="drawer" app>
       <v-list>
         <v-list-item to="/dashboard">
           <template v-slot:prepend>
@@ -26,13 +26,28 @@
           </template>
           <v-list-item-title>Bazaar</v-list-item-title>
         </v-list-item>
-        <v-list-item @click="signOut">
-          <template v-slot:prepend>
-            <v-icon>mdi-logout</v-icon>
-          </template>
-          <v-list-item-title>Sign Out</v-list-item-title>
-        </v-list-item>
+        <v-spacer></v-spacer>
       </v-list>
+
+      <template v-slot:append>
+        <div class="pa-2 custom-footer">
+          <div class="text-center">
+            &copy; {{ new Date().getFullYear() }} North Atlantic Tech™
+          </div>
+          <div class="text-center mt-1">
+            <v-btn
+              icon
+              small
+              href="https://discord.gg/8jkae3hKW5"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="white"
+            >
+              <v-icon>mdi-discord</v-icon>
+            </v-btn>
+          </div>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <v-app-bar app color="primary" dark>
@@ -60,6 +75,24 @@
     <v-main>
       <router-view/>
     </v-main>
+
+    <!-- <v-footer app padless color="turquoise" class="custom-footer">
+      <v-row justify="center" no-gutters>
+        <v-col class="text-center" cols="12">
+          <span>&copy; {{ new Date().getFullYear() }} North Atlantic Tech™</span>
+          <v-btn
+            icon
+            small
+            class="ml-2"
+            href="https://discord.gg/8jkae3hKW5"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <v-icon>mdi-discord</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-footer> -->
   </v-app>
 </template>
 
@@ -83,3 +116,9 @@ export default {
   },
 }
 </script>
+<style scoped>
+.custom-footer {
+  background-color: #008B8B !important; /* Dark Turquoise color */
+  color: white;
+}
+</style>
