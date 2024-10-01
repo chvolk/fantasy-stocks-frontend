@@ -35,7 +35,7 @@ export default {
         {
           question: 'What is the Weekly Draft?',
           answer: `
-            <p>The weekly draft is your chance to play the market like a seasoned cowboy:</p>
+            <p>The weekly draft is your chance to play the market like a seasoned cowboy. Build gains to buy packs from the Bazaar or increase your shares in stocks from your persistent portfolio:</p>
             <ul>
               <li>You're given a 50k stake to wrangle up a selection of stocks for the week.</li>
               <li>The stock corral changes weekly, offering different industries or values.</li>
@@ -47,7 +47,7 @@ export default {
         {
           question: 'How does the Bazaar work?',
           answer: `
-            <p>The Bazaar is where the real trading happens, faster than a quick-draw contest:</p>
+            <p>The Bazaar is where the real trading happens, trade with other players and grow your persistent portfolio:</p>
             <ul>
               <li>Use your weekly gains to buy packs of 5 random stocks from a surprise industry.</li>
               <li>From your inventory, you can "lock in" stocks for your persistent portfolio or "list" them on the player market.</li>

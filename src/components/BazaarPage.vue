@@ -87,7 +87,7 @@
   
             <!-- Bazaar -->
             <v-card outlined>
-              <v-tabs v-model="bazaarTab">
+              <v-tabs v-model="bazaarTab" >
                 <v-tab value="inventory" class="trade_tab">Persistent Trade</v-tab>
                 <v-tab value="market" class="market_tab">Market</v-tab>
                 <v-tab value="myListings" class="listing_tab">My Listings</v-tab>
@@ -143,7 +143,7 @@
                         small
                         color="success"
                         @click="buyMarketStock(item)"
-                        :disabled="username === item.seller"
+                        :disabled="username === item.seller || isInventoryFull || availableGains < item.price" 
                       >
                         Buy
                       </v-btn>
@@ -561,6 +561,13 @@
         this.username = response.data.user;
         
       },
+      handleTabChange(newTab) {
+      this.tab = newTab;
+      // Prevent scrolling
+      setTimeout(() => {
+        window.scrollTo(0, window.pageYOffset);
+      }, 0);
+    },
       async buyPack(currency) {
         try {
           const response = await this.api.post('/bazaar/buy-pack/', { currency })
