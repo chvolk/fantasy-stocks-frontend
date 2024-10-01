@@ -25,6 +25,12 @@
             <v-icon>mdi-store</v-icon>
           </template>
           <v-list-item-title>Bazaar</v-list-item-title>
+        </v-list-item>  
+        <v-list-item to="/faq">
+          <template v-slot:prepend>
+            <v-icon>mdi-help-circle</v-icon>
+          </template>
+          <v-list-item-title>FAQ</v-list-item-title>
         </v-list-item>
         <v-list-item @click="signOut">
           <template v-slot:prepend>
