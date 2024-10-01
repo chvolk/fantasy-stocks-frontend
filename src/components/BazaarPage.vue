@@ -6,7 +6,6 @@
             <v-card-title class="text-h4 font-weight-bold text-center mb-4">
               The Bazaar
             </v-card-title>
-            
             <!-- User's Gains and Moqs -->
             <v-row class="mb-6">
               <v-col cols="6">
@@ -21,21 +20,55 @@
                 <v-card outlined>
                   <v-card-text class="text-center">
                     <div class="text-h6">Total Moqs</div>
-                    <div class="text-h4">{{ totalMoqs }}</div>
+                    <div class="text-h4">₥{{ totalMoqs }}</div>
                   </v-card-text>
                 </v-card>
               </v-col>
             </v-row>
-  
+            
             <!-- Buy Packs -->
             <v-card outlined class="mb-6" justify="center">
               <v-card-title class="text-center">Buy Packs</v-card-title>
               <v-card-text class="text-center">
-                <v-btn color="primary" @click="buyPack('gains')">Buy Pack with Gains (${{ packPriceGains }})</v-btn>
-                <v-btn color="secondary" class="ml-2" @click="buyPack('moqs')">Buy Pack with Moqs ({{ packPriceMoqs }} Moqs)</v-btn>
+                <v-btn color="primary" @click="buyPack('gains')" :disabled="isInventoryFull || availableGains < packPriceGains">Buy Pack with Gains (${{ packPriceGains }})</v-btn>
+                <v-btn color="secondary" class="ml-2" @click="buyPack('moqs')" :disabled="isInventoryFull || totalMoqs < packPriceMoqs">Buy Pack with Moqs (₥{{ packPriceMoqs }} Moqs)</v-btn>
               </v-card-text>
             </v-card>
-  
+            <v-row class="mb-6">
+                <v-col cols="4">
+                <v-card outlined>
+                    <v-card-text class="text-center">
+                    <div class="text-h6">Inventory</div>
+                    <div class="text-h4">{{ inventoryCount }} / {{ inventoryLimit }}</div>
+                    <v-btn color="light-green" @click="showUpgradeDialog('inventory')" :disabled="totalMoqs < 500">
+                      Upgrade (₥500)
+                    </v-btn>
+                    </v-card-text>
+                </v-card>
+                </v-col>
+                <v-col cols="4">
+                <v-card outlined>
+                    <v-card-text class="text-center">
+                    <div class="text-h6">Market Listings</div>
+                    <div class="text-h4">{{ marketListingCount }} / {{ marketListingLimit }}</div>
+                    <v-btn color="orange" @click="showUpgradeDialog('market')" :disabled="totalMoqs < 600">
+                      Upgrade (₥600)
+                    </v-btn>
+                    </v-card-text>
+                </v-card>
+                </v-col>
+                <v-col cols="4">
+                <v-card outlined>
+                    <v-card-text class="text-center">
+                    <div class="text-h6">Persistent Portfolio</div>
+                    <div class="text-h4">{{ persistentPortfolioCount }} / {{ persistentPortfolioLimit }}</div>
+                    <v-btn color="purple" @click="showUpgradeDialog('portfolio')" :disabled="totalMoqs < 700">
+                      Upgrade (₥700)
+                    </v-btn>
+                    </v-card-text>
+                </v-card>
+                </v-col>
+            </v-row>
             <!-- Inventory -->
             <v-card outlined class="mb-6">
               <v-card-title>Your Inventory</v-card-title>
@@ -46,8 +79,8 @@
                 class="elevation-1"
               >
                 <template v-slot:item.actions="{ item }">
-                  <v-btn small color="success" @click="lockInStock(item)">Lock In</v-btn>
-                  <v-btn small color="info" @click="listStock(item)">List</v-btn>
+                  <v-btn small color="success" @click="lockInStock(item)" :disabled="isPersistentPortfolioFull">Lock In</v-btn>
+                  <v-btn small color="info" @click="listStock(item)" :disabled="isMarketListingFull">List</v-btn>
                 </template>
               </v-data-table>
             </v-card>
@@ -152,6 +185,7 @@
                         small
                         color="error"
                         @click="cancelListing(item)"
+                        :disabled="isInventoryFull"
                       >
                         Remove
                       </v-btn>
@@ -338,6 +372,21 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+  
+  <!-- Confirmation Dialog -->
+  <v-dialog v-model="showConfirmDialog" max-width="300">
+    <v-card>
+      <v-card-title class="headline">Confirm Upgrade</v-card-title>
+      <v-card-text>
+        Are you sure you want to upgrade your {{ upgradeType }} limit for ₥{{ upgradeCost }}?
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="green darken-1" text @click="confirmUpgrade">Confirm</v-btn>
+        <v-btn color="red darken-1" text @click="showConfirmDialog = false">Cancel</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
     </v-container>
   </template>
   
@@ -441,6 +490,15 @@
       selectedStock: null,
       tradeAction: '',
       tradeQuantity: 1,
+      inventoryLimit: 0,
+      marketListingLimit: 0,
+      persistentPortfolioLimit: 0,
+      inventoryCount: 0,
+      marketListingCount: 0,
+      persistentPortfolioCount: 0,
+      showConfirmDialog: false,
+      upgradeType: '',
+      upgradeCost: 0,
     }),
     computed: {
         canBuyPersistent() {
@@ -457,7 +515,16 @@
       canSellPersistent() {
       return this.sellQuantity > 0 && this.selectedStock && 
            this.sellQuantity <= this.selectedStock.quantity;
-  }
+  },
+  isInventoryFull() {
+      return this.inventoryCount >= this.inventoryLimit;
+    },
+    isMarketListingFull() {
+      return this.marketListingCount >= this.marketListingLimit;
+    },
+    isPersistentPortfolioFull() {
+      return this.persistentPortfolioCount >= this.persistentPortfolioLimit;
+    },
     },
     mounted() {
       this.fetchBazaarData()
@@ -474,6 +541,12 @@
           console.log(this.marketListings)
           this.myListings = response.data.user_listings
           this.persistentTradeStocks = response.data.persistent_portfolio
+          this.inventoryLimit = response.data.inventory_limit;
+          this.marketListingLimit = response.data.market_listing_limit;
+          this.persistentPortfolioLimit = response.data.persistent_portfolio_limit;
+          this.inventoryCount = response.data.inventory_count;
+          this.marketListingCount = response.data.market_listing_count;
+          this.persistentPortfolioCount = response.data.persistent_portfolio_count;
         } catch (error) {
           console.error('Error fetching bazaar data:', error)
         }
@@ -611,7 +684,7 @@
         this.confirmMessage = `Buy ${listing.name} (${listing.symbol}) for ${listing.price} Moqs?`
         this.confirmAction = async () => {
           try {
-            await this.api.post('http://localhost:8000/bazaar/buy-listed-stock/', { listing_id: listing.id })
+            await this.api.post('/http://localhost:8000/bazaar/buy-listed-stock/', { listing_id: listing.id })
             this.fetchBazaarData()
             this.confirmDialog = false
           } catch (error) {
@@ -795,6 +868,73 @@
       closeBuyMarketDialog() {
         this.buyMarketDialog = false;
         this.selectedStock = null;
+      },
+      showUpgradeDialog(type) {
+        this.upgradeType = type;
+        this.upgradeCost = type === 'inventory' ? 500 : type === 'market' ? 600 : 700;
+        this.showConfirmDialog = true;
+      },
+      async confirmUpgrade() {
+        this.showConfirmDialog = false;
+        switch (this.upgradeType) {
+          case 'inventory':
+            await this.upgradeInventoryLimit();
+            break;
+          case 'market':
+            await this.upgradeMarketListingLimit();
+            break;
+          case 'portfolio':
+            await this.upgradePersistentPortfolioLimit();
+            break;
+        }
+      },
+      async upgradeInventoryLimit() {
+        try {
+          await this.api.post('/bazaar/upgrade-inventory-limit/');
+          this.$store.commit('setSnackbar', {
+            text: 'Inventory limit upgraded successfully',
+            color: 'success'
+          });
+          await this.fetchBazaarData();
+        } catch (error) {
+          console.error('Error upgrading inventory limit:', error);
+          this.$store.commit('setSnackbar', {
+            text: 'Failed to upgrade inventory limit',
+            color: 'error'
+          });
+        }
+      },
+      async upgradeMarketListingLimit() {
+        try {
+          await this.api.post('/bazaar/upgrade-market-listing-limit/');
+          this.$store.commit('setSnackbar', {
+            text: 'Market listing limit upgraded successfully',
+            color: 'success'
+          });
+          await this.fetchBazaarData();
+        } catch (error) {
+          console.error('Error upgrading market listing limit:', error);
+          this.$store.commit('setSnackbar', {
+            text: 'Failed to upgrade market listing limit',
+            color: 'error'
+          });
+        }
+      },
+      async upgradePersistentPortfolioLimit() {
+        try {
+          await this.api.post('/bazaar/upgrade-persistent-portfolio-limit/');
+          this.$store.commit('setSnackbar', {
+            text: 'Persistent portfolio limit upgraded successfully',
+            color: 'success'
+          });
+          await this.fetchBazaarData();
+        } catch (error) {
+          console.error('Error upgrading persistent portfolio limit:', error);
+          this.$store.commit('setSnackbar', {
+            text: 'Failed to upgrade persistent portfolio limit',
+            color: 'error'
+          });
+        }
       },
     },
   }

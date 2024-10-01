@@ -159,7 +159,7 @@
                   <v-card outlined>
                     <v-card-text class="text-center">
                       <div class="text-h6">Total MOQs</div>
-                      <div class="text-h4">{{ availableMoqs }}</div>
+                      <div class="text-h4">₥{{ availableMoqs }}</div>
                     </v-card-text>
                   </v-card>
                 </v-col>
