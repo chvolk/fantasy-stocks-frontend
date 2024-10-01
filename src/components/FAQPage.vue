@@ -35,7 +35,7 @@ export default {
         {
           question: 'What is the Weekly Draft?',
           answer: `
-            <p>The weekly draft is your chance to play the market like a seasoned cowboy. Build gains to buy packs from the Bazaar or increase your shares in stocks from your persistent portfolio:</p>
+            <p>The weekly draft is your chance to play the market with a new strategy each week. Build gains to buy packs from the Bazaar or increase your shares in stocks from your persistent portfolio:</p>
             <ul>
               <li>You're given a 50k stake to wrangle up a selection of stocks for the week.</li>
               <li>The stock corral changes weekly, offering different industries or values.</li>
