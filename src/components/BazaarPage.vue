@@ -373,7 +373,7 @@
       availableGains: 0,
       totalMoqs: 0,
       packPriceGains: 1000,
-      packPriceMoqs: 100,
+      packPriceMoqs: 250,
       inventory: [],
       buyPersistentDialog: false,
   buyQuantity: 1,
