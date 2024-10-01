@@ -358,10 +358,10 @@
     setup() {
       const api = inject('api')
       const myListingsHeaders = [
-        { text: 'Symbol', value: 'symbol' },
-        { text: 'Name', value: 'name' },
-        { text: 'Listing Price', value: 'price' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { title: 'Symbol', value: 'symbol', sortable: true },
+        { title: 'Name', value: 'name', sortable: true },
+        { title: 'Listing Price', value: 'price', sortable: true },
+        { title: 'Actions', value: 'actions', sortable: false },
         ];
 
       const myListings = ref([]);
