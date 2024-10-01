@@ -20,7 +20,7 @@
 
     <v-row class="cta-section py-12 align-center justify-center" style="background-color: #f5f5f5;">
       <v-col cols="12" md="8" class="text-center">
-        <h2 class="text-h4 mb-4">Ready to start your investment journey?</h2>
+        <h2 class="text-h4 mb-4">Ready to start trading?</h2>
         <v-btn x-large color="success" to="/signup">Sign Up Now</v-btn>
       </v-col>
     </v-row>
