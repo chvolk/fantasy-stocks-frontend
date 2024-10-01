@@ -66,7 +66,7 @@
       moqHeaders: [
       { title: 'Rank', align: 'start', value: 'rank' },
       { title: 'Username', align: 'start', value: 'username' },
-        { title: 'Total Moqs', align: 'end', value: 'total_moqs' },
+      { title: 'Total Moqs', align: 'end', value: 'total_moqs' },
       ],
       moqLeaderboard: [],
     }),
@@ -101,11 +101,13 @@
               'Authorization': `Token ${token}`
             }
           })
+          console.log(response)
           this.moqLeaderboard = response.data.map((item, index) => ({
             ...item,
             rank: index + 1,
-            total_moqs: Number(item.total_moqs).toFixed(2)
+            total_moqs: Number(item.total_moqs).toFixed(2),
           }))
+          console.log(this.moqLeaderboard)
         } catch (error) {
           console.error('Error fetching moq leaderboard:', error)
         }
