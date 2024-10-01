@@ -8,8 +8,8 @@
           </v-card-title>
 
           <v-tabs v-model="activeTab" centered>
-            <v-tab>Weekly Portfolio Value</v-tab>
-            <v-tab>Total Moqs</v-tab>
+            <v-tab class="weekly_tab">Weekly Portfolio Value</v-tab>
+            <v-tab class="moq_tab">Total Moqs</v-tab>
           </v-tabs>
 
           <v-window v-model="activeTab">
@@ -123,5 +123,13 @@
   
   .error--text {
     color: #F44336 !important;
+  }
+  .weekly_tab {
+    background-color: #d60cff;
+    color: #ffffff;
+  }
+  .moq_tab {
+    background-color: #2dca6f;
+    color: #ffffff;
   }
   </style>

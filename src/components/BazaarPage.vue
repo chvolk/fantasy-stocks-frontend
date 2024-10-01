@@ -88,9 +88,9 @@
             <!-- Bazaar -->
             <v-card outlined>
               <v-tabs v-model="bazaarTab">
-                <v-tab value="inventory">Persistent Trade</v-tab>
-                <v-tab value="market">Market</v-tab>
-                <v-tab value="myListings">My Listings</v-tab>
+                <v-tab value="inventory" class="trade_tab">Persistent Trade</v-tab>
+                <v-tab value="market" class="market_tab">Market</v-tab>
+                <v-tab value="myListings" class="listing_tab">My Listings</v-tab>
               </v-tabs>
               <v-window v-model="bazaarTab">
                 <v-window-item value="inventory">
@@ -949,6 +949,19 @@
   .inventory_upgrade {
     margin-bottom: 10px;
     background-color: #2dca6f;
+    color: #ffffff;
+  }
+  .trade_tab {
+    background-color: #d60cff;
+    color: #ffffff;
+  }
+  
+  .market_tab {
+    background-color: #2dca6f;
+    color: #ffffff;
+  }
+  .listing_tab {
+    background-color: #FFA500;
     color: #ffffff;
   }
 </style>
