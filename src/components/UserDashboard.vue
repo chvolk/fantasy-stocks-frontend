@@ -142,7 +142,7 @@
                     <v-card-text class="text-center">
                       <div class="text-h6">Total Gain/Loss</div>
                       <div :class="['text-h4', persistentGainLossColor]">
-                        {{ persistentGainLoss >= 0 ? '+' : '-' }}${{ Math.abs(persistentGainLoss).toFixed(2) }}
+                        {{ persistentGainLoss >= 0 ? '+' : '-' }}₥{{ Math.abs(persistentGainLoss).toFixed(2) }}
                       </div>
                     </v-card-text>
                   </v-card>
@@ -151,7 +151,7 @@
                   <v-card outlined>
                     <v-card-text class="text-center">
                       <div class="text-h6">Total Portfolio Value</div>
-                      <div class="text-h4">${{ persistentTotalValue.toFixed(2) }}</div>
+                      <div class="text-h4">₥{{ persistentTotalValue.toFixed(2) }}</div>
                     </v-card-text>
                   </v-card>
                 </v-col>
