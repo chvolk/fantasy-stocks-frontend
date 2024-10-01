@@ -40,7 +40,7 @@
                     <v-card-text class="text-center">
                     <div class="text-h6">Inventory</div>
                     <div class="text-h4">{{ inventoryCount }} / {{ inventoryLimit }}</div>
-                    <v-btn color="light-green" @click="showUpgradeDialog('inventory')" :disabled="totalMoqs < 500">
+                    <v-btn class="inventory_upgrade" @click="showUpgradeDialog('inventory')" :disabled="totalMoqs < 500">
                       Upgrade (₥500)
                     </v-btn>
                     </v-card-text>
@@ -51,7 +51,7 @@
                     <v-card-text class="text-center">
                     <div class="text-h6">Market Listings</div>
                     <div class="text-h4">{{ marketListingCount }} / {{ marketListingLimit }}</div>
-                    <v-btn color="orange" @click="showUpgradeDialog('market')" :disabled="totalMoqs < 600">
+                    <v-btn class="market_upgrade" @click="showUpgradeDialog('market')" :disabled="totalMoqs < 600">
                       Upgrade (₥600)
                     </v-btn>
                     </v-card-text>
@@ -939,3 +939,16 @@
     },
   }
   </script>
+
+  <style scoped>
+  .market_upgrade {
+    margin-bottom: 10px;
+    background-color: #FFA500;
+    color: #ffffff;
+  }
+  .inventory_upgrade {
+    margin-bottom: 10px;
+    background-color: #2dca6f;
+    color: #ffffff;
+  }
+</style>
