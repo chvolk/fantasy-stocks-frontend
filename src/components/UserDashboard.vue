@@ -137,7 +137,15 @@
             <v-card-title>Persistent Performance Overview</v-card-title>
             <v-card-text>
               <v-row>
-                <v-col cols="12" sm="6" md="4">
+                <v-col cols="12" sm="6" md="6">
+                  <v-card outlined>
+                    <v-card-text class="text-center">
+                      <div class="text-h6">Available Gains</div>
+                      <div class="text-h4 primary--text">${{ availableGains.toFixed(2) }}</div>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+                <v-col cols="12" sm="6" md="6">
                   <v-card outlined>
                     <v-card-text class="text-center">
                       <div class="text-h6">Total Gain/Loss</div>
@@ -147,7 +155,7 @@
                     </v-card-text>
                   </v-card>
                 </v-col>
-                <v-col cols="12" sm="6" md="4">
+                <v-col cols="12" sm="6" md="6">
                   <v-card outlined>
                     <v-card-text class="text-center">
                       <div class="text-h6">Total Portfolio Value</div>
@@ -155,7 +163,7 @@
                     </v-card-text>
                   </v-card>
                 </v-col>
-                <v-col cols="12" sm="6" md="4">
+                <v-col cols="12" sm="6" md="6">
                   <v-card outlined>
                     <v-card-text class="text-center">
                       <div class="text-h6">Total MOQs</div>
@@ -369,6 +377,7 @@ export default {
     persistentTotalValue: 0,
     persistentGainLoss: 0,
     availableMoqs: 0,
+    availableGains: 0,
   }),
   computed: {
     formattedUsername() {
@@ -419,7 +428,8 @@ export default {
       return totalValue;
     },
     totalGainLoss() {
-      return this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment);
+      const gains = this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment);
+      return gains;
     },
     gainLossColor() {
       return this.totalGainLoss > -.01 ? 'green--text' : 'red--text';
@@ -438,10 +448,6 @@ export default {
     },
     persistentGainLossColor() {
       return this.persistentGainLoss >= 0 ? 'success--text' : 'error--text';
-    },
-    availableGains() {
-      //Calculate available gains
-      return this.persistentTotalValue - this.initialInvestment;
     },
     canBuyPersistent() {
       return this.buyQuantity > 0 && this.selectedStock && 
@@ -479,6 +485,7 @@ export default {
         this.balance = Number(response.data.balance);
         this.availableBalance = this.balance;
         this.username = response.data.user;
+        this.availableGains = Number(response.data.available_gains);
         this.initialInvestment = Number(response.data.initial_investment);
         
         this.$nextTick(() => {
@@ -489,6 +496,15 @@ export default {
         console.log('Balance:', this.balance);
         console.log('Total Portfolio Value:', this.totalPortfolioValue);
         console.log('Total Gain/Loss:', this.totalGainLoss);
+        // update total gain loss and available gains
+        await axios.post('/api/update-gains/', {
+          total_gain_loss: this.totalGainLoss,
+          available_gains: this.availableGains
+        }, {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
       } catch (error) {
         console.error('Error fetching portfolio:', error)
       }

@@ -11,16 +11,36 @@
               <v-col cols="6">
                 <v-card outlined>
                   <v-card-text class="text-center">
-                    <div class="text-h6">Available Gains</div>
-                    <div class="text-h4">${{ availableGains.toFixed(2) }}</div>
+                    <div class="text-h6" :style="{ color: 'green' }">Available Gains</div>
+                    <div class="text-h4" :style="{ color: 'green' }">${{ availableGains.toFixed(2) }}</div>
                   </v-card-text>
                 </v-card>
               </v-col>
               <v-col cols="6">
                 <v-card outlined>
                   <v-card-text class="text-center">
-                    <div class="text-h6">Total Moqs</div>
-                    <div class="text-h4">₥{{ totalMoqs }}</div>
+                    <div class="text-h6" :style="{ color: 'purple' }">Total Gains</div>
+                    <div class="text-h4" :style="{ color: 'purple' }">
+                      ${{ ((Number(availableGains) || 0) + (Number(totalSpent) || 0)).toFixed(2) }}
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+            <v-row class="mb-6">
+              <v-col cols="6">
+                <v-card outlined>
+                  <v-card-text class="text-center">
+                    <div class="text-h6" :style="{ color: 'blue' }">Total Moqs</div>
+                    <div class="text-h4" :style="{ color: 'blue' }">₥{{ totalMoqs }}</div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+              <v-col cols="6">
+                <v-card outlined>
+                  <v-card-text class="text-center">
+                    <div class="text-h6" :style="{ color: 'red' }">Total Spent</div>
+                    <div class="text-h4" :style="{ color: 'red' }">${{ totalSpent.toFixed(2) }}</div>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -31,39 +51,45 @@
               <v-card-title class="text-center">Buy Packs</v-card-title>
               <v-card-text class="text-center">
                 <v-btn color="primary" @click="buyPack('gains')" :disabled="isInventoryFull || availableGains < packPriceGains">Buy Pack with Gains (${{ packPriceGains }})</v-btn>
-                <v-btn color="secondary" class="ml-2" @click="buyPack('moqs')" :disabled="isInventoryFull || totalMoqs < packPriceMoqs">Buy Pack with Moqs (₥{{ packPriceMoqs }} Moqs)</v-btn>
+                <v-btn color="light-blue" class="ml-2" @click="buyPack('moqs')" :disabled="isInventoryFull || totalMoqs < packPriceMoqs">Buy Pack with Moqs (₥{{ packPriceMoqs }} Moqs)</v-btn>
               </v-card-text>
             </v-card>
             <v-row class="mb-6">
                 <v-col cols="4">
-                <v-card outlined>
-                    <v-card-text class="text-center">
-                    <div class="text-h6">Inventory</div>
-                    <div class="text-h4">{{ inventoryCount }} / {{ inventoryLimit }}</div>
-                    <v-btn class="inventory_upgrade" @click="showUpgradeDialog('inventory')" :disabled="totalMoqs < 500">
-                      Upgrade (₥500)
+                <v-card outlined height="100%">
+                    <v-card-text class="text-center d-flex flex-column justify-space-between" style="height: 100%;">
+                    <div>
+                        <div class="text-h6">Inventory</div>
+                        <div class="text-h4">{{ inventoryCount }} / {{ inventoryLimit }}</div>
+                    </div>
+                    <v-btn class="inventory_upgrade mt-4" @click="showUpgradeDialog('inventory')" :disabled="totalMoqs < 500">
+                        Upgrade (₥500)
                     </v-btn>
                     </v-card-text>
                 </v-card>
                 </v-col>
                 <v-col cols="4">
-                <v-card outlined>
-                    <v-card-text class="text-center">
-                    <div class="text-h6">Market Listings</div>
-                    <div class="text-h4">{{ marketListingCount }} / {{ marketListingLimit }}</div>
-                    <v-btn class="market_upgrade" @click="showUpgradeDialog('market')" :disabled="totalMoqs < 600">
-                      Upgrade (₥600)
+                <v-card outlined height="100%">
+                    <v-card-text class="text-center d-flex flex-column justify-space-between" style="height: 100%;">
+                    <div>
+                        <div class="text-h6">Market Listings</div>
+                        <div class="text-h4">{{ marketListingCount }} / {{ marketListingLimit }}</div>
+                    </div>
+                    <v-btn class="market_upgrade mt-4" @click="showUpgradeDialog('market')" :disabled="totalMoqs < 600">
+                        Upgrade (₥600)
                     </v-btn>
                     </v-card-text>
                 </v-card>
                 </v-col>
                 <v-col cols="4">
-                <v-card outlined>
-                    <v-card-text class="text-center">
-                    <div class="text-h6">Persistent Portfolio</div>
-                    <div class="text-h4">{{ persistentPortfolioCount }} / {{ persistentPortfolioLimit }}</div>
-                    <v-btn color="purple" @click="showUpgradeDialog('portfolio')" :disabled="totalMoqs < 700">
-                      Upgrade (₥700)
+                <v-card outlined height="100%">
+                    <v-card-text class="text-center d-flex flex-column justify-space-between" style="height: 100%;">
+                    <div>
+                        <div class="text-h6">Persistent Portfolio</div>
+                        <div class="text-h4">{{ persistentPortfolioCount }} / {{ persistentPortfolioLimit }}</div>
+                    </div>
+                    <v-btn color="purple" class="mt-4" @click="showUpgradeDialog('portfolio')" :disabled="totalMoqs < 700">
+                        Upgrade (₥700)
                     </v-btn>
                     </v-card-text>
                 </v-card>
@@ -143,7 +169,7 @@
                         small
                         color="success"
                         @click="buyMarketStock(item)"
-                        :disabled="username === item.seller || isInventoryFull || availableGains < item.price" 
+                        :disabled="username === item.seller || isInventoryFull || totalMoqs < item.price" 
                       >
                         Buy
                       </v-btn>
@@ -267,7 +293,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="packDialog = false" :disabled="packOpeningState !== 'revealed'">Close</v-btn>
+            <!-- <v-btn color="blue darken-1" text @click="packDialog = false" :disabled="packOpeningState !== 'revealed'">Close</v-btn> -->
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -419,10 +445,13 @@
       return { api, myListingsHeaders, myListings, editListingDialog }
     },
     data: () => ({
-      availableGains: 0,
+      
+      totalSpent: 0,
       totalMoqs: 0,
+      totalSpent: 0,
       packPriceGains: 500,
       packPriceMoqs: 250,
+      availableGains: 0,
       inventory: [],
       buyPersistentDialog: false,
   buyQuantity: 1,
@@ -499,6 +528,9 @@
       showConfirmDialog: false,
       upgradeType: '',
       upgradeCost: 0,
+      portfolio: [],
+      balance: 0,
+      initialInvestment: 0,
     }),
     computed: {
         canBuyPersistent() {
@@ -516,6 +548,31 @@
       return this.sellQuantity > 0 && this.selectedStock && 
            this.sellQuantity <= this.selectedStock.quantity;
   },
+  portfolioWithTotalValue() {
+      let portfolio = this.portfolio.map(item => {
+        const totalValue = Number(item.quantity) * Number(item.stock.current_price);
+        const purchaseValue = Number(item.quantity) * Number(item.stock.purchase_price);
+        const gain_loss = totalValue - purchaseValue;
+        return {
+          ...item,
+          totalValue,
+          gain_loss,
+        };
+      });
+      return portfolio;
+    },
+  totalPortfolioValue() {
+      const totalValue = this.portfolioWithTotalValue.reduce((sum, item) => {
+        // Use full precision for calculation
+        return sum + (Number(item.quantity) * Number(item.stock.current_price));
+      }, 0);
+      console.log('Total Portfolio Value:', totalValue);
+      return totalValue;
+    },
+  totalGainLoss() {
+      const gains = this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment);
+      return gains;
+    },
   isInventoryFull() {
       return this.inventoryCount >= this.inventoryLimit;
     },
@@ -533,8 +590,8 @@
     methods: {
       async fetchBazaarData() {
         try {
+        //   const response = await this.api.get('/bazaar/')
           const response = await this.api.get('/bazaar/')
-          this.availableGains = response.data.available_gains
           this.totalMoqs = response.data.total_moqs
           this.inventory = response.data.inventory
           this.marketListings = response.data.market_listings
@@ -552,15 +609,43 @@
         }
       },
       async fetchPortfolio() {
-        const token = localStorage.getItem('token');
-        const response = await this.api.get('/portfolio/', {
-          headers: {
-            'Authorization': `Token ${token}`
-          }
-        });
-        this.username = response.data.user;
-        
-      },
+        try {
+                const token = localStorage.getItem('token')
+                const response = await this.api.get('/portfolio/', {
+                headers: {
+                    'Authorization': `Token ${token}`
+                }
+                })
+                console.log('portfolio')
+                console.log(response.data)
+                this.portfolio = response.data.stocks.map(stock => ({
+                ...stock,
+                quantity: Number(stock.quantity),
+                stock: {
+                    ...stock.stock,
+                    current_price: Number(stock.stock.current_price),
+                    purchase_price: Number(stock.stock.purchase_price)
+                }
+                }));
+                this.username = response.data.user
+                this.availableGains = Number(response.data.available_gains) || 0
+                this.initialInvestment = Number(response.data.initial_investment) || 0
+                this.totalSpent = Number(response.data.total_spent) || 0
+                this.balance = Number(response.data.balance) || 0
+                await this.api.post('/update-gains/', {
+                  total_gain_loss: this.totalGainLoss,
+                  available_gains: this.availableGains
+                }, {
+                  headers: {
+                    'Authorization': `Token ${token}`
+                  }
+                });
+            } catch (error) {
+                console.error('Error fetching portfolio:', error)
+            } finally {
+                this.loading = false
+            }
+        },
       handleTabChange(newTab) {
       this.tab = newTab;
       // Prevent scrolling
@@ -599,12 +684,12 @@
             await this.delay(500) // Delay between each stock reveal
             this.visiblePackStocks.push(stock)
           }
-
           // All stocks revealed
           this.packOpeningState = 'revealed'
-          
+        
           // Refresh bazaar data after buying a pack
           await this.fetchBazaarData()
+          await this.fetchPortfolio()
         } catch (error) {
           console.error('Error buying pack:', error)
         }
@@ -691,7 +776,7 @@
         this.confirmMessage = `Buy ${listing.name} (${listing.symbol}) for ${listing.price} Moqs?`
         this.confirmAction = async () => {
           try {
-            await this.api.post('/http://localhost:8000/bazaar/buy-listed-stock/', { listing_id: listing.id })
+            await this.api.post('//bazaar/buy-listed-stock/', { listing_id: listing.id })
             this.fetchBazaarData()
             this.confirmDialog = false
           } catch (error) {
