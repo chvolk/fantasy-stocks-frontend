@@ -9,7 +9,7 @@ import StockDraft from '@/components/StockDraft.vue'
 import Leaderboard from '@/components/Leaderboard.vue'
 import BazaarPage from '@/components/BazaarPage.vue'
 import FAQPage from '@/components/FAQPage.vue'
-
+import PrivacyPolicy from '@/components/PrivacyPolicy.vue'
 const routes = [
   { path: '/admin', name: 'Admin', beforeEnter: () => { window.location.href = '/admin/' } },
   { path: '/', component: LandingPage },
@@ -43,6 +43,10 @@ const routes = [
   {
     path: '/faq',
     component: FAQPage
+  },
+  {
+    path: '/privacy-policy',
+    component: PrivacyPolicy
   }
 ]
 

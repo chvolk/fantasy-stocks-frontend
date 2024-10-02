@@ -32,6 +32,12 @@
           </template>
           <v-list-item-title>FAQ</v-list-item-title>
         </v-list-item>
+        <v-list-item to="/privacy-policy">
+          <template v-slot:prepend>
+            <v-icon>mdi-shield-account</v-icon>
+          </template>
+          <v-list-item-title>Privacy Policy</v-list-item-title>
+        </v-list-item>
         <v-list-item @click="signOut">
           <template v-slot:prepend>
             <v-icon>mdi-logout</v-icon>
