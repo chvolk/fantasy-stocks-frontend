@@ -421,7 +421,7 @@
     data: () => ({
       availableGains: 0,
       totalMoqs: 0,
-      packPriceGains: 1000,
+      packPriceGains: 500,
       packPriceMoqs: 250,
       inventory: [],
       buyPersistentDialog: false,
