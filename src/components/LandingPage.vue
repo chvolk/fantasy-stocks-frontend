@@ -7,7 +7,7 @@
         <v-btn x-large color="primary" class="mr-4" to="/signup" v-if="!isAuthenticated">Get Started</v-btn>
         <v-btn x-large color="primary" class="mr-4" to="/dashboard" v-else>Go to Dashboard</v-btn>
         <v-btn x-large outlined to="/login" v-if="!isAuthenticated">Login</v-btn>
-        <v-btn x-large outlined to="/logout" v-else>Logout</v-btn>
+        <v-btn x-large outlined to ="/" v-else @click="signOut" >Logout</v-btn>
       </v-col>
     </v-row>
 
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'LandingPage',
@@ -43,6 +43,13 @@ export default {
   }),
   computed: {
     ...mapGetters('auth', ['isAuthenticated']),
+  },
+  methods: {
+    ...mapActions('auth', ['logout']),
+    async signOut() {
+      await this.logout();
+      this.$router.push('/');
+    },
   },
 }
 </script>
