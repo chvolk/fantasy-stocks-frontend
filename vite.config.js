@@ -41,7 +41,19 @@ export default defineConfig({
           });
         },
       }
-    }
+    },
+    watch: {
+      ignored: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/public/**',
+        '**/vite.config.js',
+        '**/package.json',
+        '**/package-lock.json',
+        '**/.git/***'
+      ],
+    },
   },
   base: '/',
 })
