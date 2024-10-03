@@ -16,7 +16,7 @@
             <v-window-item>
               <v-data-table
                 :headers="headers"
-                :items="leaderboard"
+                :items="filteredLeaderboard"
                 :items-per-page="10"
                 class="elevation-1"
               >
@@ -31,7 +31,7 @@
             <v-window-item>
               <v-data-table
                 :headers="moqHeaders"
-                :items="moqLeaderboard"
+                :items="filteredMoqLeaderboard"
                 :items-per-page="10"
                 class="elevation-1"
               >
@@ -73,6 +73,14 @@
     mounted() {
       this.fetchLeaderboard()
       this.fetchMoqLeaderboard()
+    },
+    computed: {
+      filteredLeaderboard() {
+        return this.leaderboard.filter(item => Number(item.total_value) !== 50000.00)
+      },
+      filteredMoqLeaderboard() {
+        return this.moqLeaderboard.filter(item => Number(item.total_moqs) !== 600)
+      }
     },
     methods: {
       async fetchLeaderboard() {
