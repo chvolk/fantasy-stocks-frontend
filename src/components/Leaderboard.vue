@@ -76,7 +76,8 @@
     },
     computed: {
       filteredLeaderboard() {
-        return this.leaderboard.filter(item => Number(item.total_value) !== 50000.00)
+        // return this.leaderboard.filter(item => Number(item.total_value) !== 50000.00 )
+        return this.leaderboard
       },
       filteredMoqLeaderboard() {
         return this.moqLeaderboard.filter(item => Number(item.total_moqs) !== 600)
