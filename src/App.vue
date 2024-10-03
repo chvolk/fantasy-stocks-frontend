@@ -71,7 +71,7 @@
 
     <v-app-bar app color="primary" dark>
       <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated"></v-app-bar-nav-icon>
-      <v-toolbar-title>
+      <v-toolbar-title @click="$router.push('/')" style="cursor: pointer;">
         Moq Exchange
       </v-toolbar-title>
       <v-spacer></v-spacer>
