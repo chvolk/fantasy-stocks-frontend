@@ -4,8 +4,10 @@
       <v-col cols="12" md="8" class="text-center">
         <h1 class="text-h2 font-weight-bold mb-4">Welcome to Moq Exchange</h1>
         <p class="text-h5 mb-6">Buy low, sell high. Play the weekly challenge and climb the leaderboard.</p>
-        <v-btn x-large color="primary" class="mr-4" to="/signup">Get Started</v-btn>
-        <v-btn x-large outlined to="/login">Login</v-btn>
+        <v-btn x-large color="primary" class="mr-4" to="/signup" v-if="!isAuthenticated">Get Started</v-btn>
+        <v-btn x-large color="primary" class="mr-4" to="/dashboard" v-else>Go to Dashboard</v-btn>
+        <v-btn x-large outlined to="/login" v-if="!isAuthenticated">Login</v-btn>
+        <v-btn x-large outlined to="/logout" v-else>Logout</v-btn>
       </v-col>
     </v-row>
 
@@ -28,6 +30,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'LandingPage',
   data: () => ({
@@ -37,6 +41,9 @@ export default {
       { title: 'Real-Time Data', description: 'Get access to real-time stock data and market trends to inform your decisions.' },
     ],
   }),
+  computed: {
+    ...mapGetters('auth', ['isAuthenticated']),
+  },
 }
 </script>
 
