@@ -499,7 +499,7 @@ export default {
         this.username = response.data.user;
         this.availableGains = Number(response.data.available_gains);
         this.initialInvestment = Number(response.data.initial_investment);
-        
+        console.log('Available Gains:', this.availableGains);
         this.$nextTick(() => {
           this.$forceUpdate();
         });
@@ -667,6 +667,7 @@ export default {
       
       this.closeBuyDialog();
       await this.fetchPortfolio();
+      await this.fetchPersistentPortfolio();
       // this.totalGainLoss = response.data.total_gain_loss;
       console.log('Total Gain/Loss:', this.totalGainLoss);
     } catch (error) {
