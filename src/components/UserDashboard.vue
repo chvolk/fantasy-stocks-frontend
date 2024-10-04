@@ -53,7 +53,7 @@
                 <template v-slot:footer>
                   <v-row class="mt-2 pa-2" align="center" justify="space-between">
                     <strong>Total Portfolio Value:</strong>
-                    <span class="text-h5 font-weight-bold">${{ totalPortfolioValue.toFixed(2) }}</span>
+                    <span :class="['text-h5', totalPortfolioValueColor]">${{ totalPortfolioValue.toFixed(2) }}</span>
                   </v-row>
                 </template>
               </v-data-table>
@@ -76,9 +76,9 @@
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-card outlined>
-                    <v-card-text class="text-center">
+                    <v-card-text class="text-center" :class="totalPortfolioValueColor">
                       <div class="text-h6">Total Portfolio Value</div>
-                      <div class="text-h4">${{ totalPortfolioValue.toFixed(2) }}</div>
+                      <div :class="['text-h4', totalPortfolioValueColor]">${{ totalPortfolioValue.toFixed(2) }}</div>
                     </v-card-text>
                   </v-card>
                 </v-col>
@@ -234,7 +234,7 @@
         <v-col cols="12">
           <p class="font-weight-bold">Total Cost: ${{ (selectedStock.stock.current_price * buyQuantity).toFixed(2) }}</p>
           <p :class="{'error--text': selectedStock.stock.current_price * buyQuantity > availableGains}">
-            Remaining Gains: ${{ (Math.abs(totalGainLoss) - (selectedStock.stock.current_price * buyQuantity)).toFixed(2) }}
+            Remaining Gains: ${{ availableGains - (selectedStock.stock.current_price * buyQuantity).toFixed(2) }}
           </p>
         </v-col>
       </v-row>
@@ -390,6 +390,18 @@ export default {
     },
     persistentGainLossColor() {
     return this.persistentGainLoss >= 0 ? 'success--text' : 'error--text';
+  },
+  availableGainColor() {
+    return this.availableGains >= 0 ? 'success--text' : 'error--text';
+  },
+  persistentTotalValueColor() {
+    return this.persistentTotalValue >= 0 ? 'success--text' : 'error--text';
+  },
+  persistentTotalGainLossColor() {
+    return this.persistentTotalGainLoss >= 0 ? 'success--text' : 'error--text';
+  },
+  totalPortfolioValueColor() {
+    return this.totalPortfolioValue >= 0 ? 'success--text' : 'error--text';
   },
     portfolioWithTotalValue() {
       let portfolio = this.portfolio.map(item => {
