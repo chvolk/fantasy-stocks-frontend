@@ -234,7 +234,7 @@
         <v-col cols="12">
           <p class="font-weight-bold">Total Cost: ${{ (selectedStock.stock.current_price * buyQuantity).toFixed(2) }}</p>
           <p :class="{'error--text': selectedStock.stock.current_price * buyQuantity > availableGains}">
-            Remaining Gains: ${{ availableGains - (selectedStock.stock.current_price * buyQuantity).toFixed(2) }}
+            Remaining Gains: ${{ (availableGains - (selectedStock.stock.current_price * buyQuantity)).toFixed(2) }}
           </p>
         </v-col>
       </v-row>
