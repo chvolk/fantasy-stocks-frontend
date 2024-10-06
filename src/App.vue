@@ -64,6 +64,7 @@
             >
               <v-icon>mdi-discord</v-icon>
             </v-btn>
+            <p>Join us on Discord!</p>
           </div>
         </div>
       </template>
