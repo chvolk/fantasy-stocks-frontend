@@ -124,6 +124,14 @@ import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'App',
+  metaInfo: {
+    title: 'Moq Exchange. Trade stocks with virtual currency, climb the leaderboard and build your persistent portfolio.',
+    meta: [
+      { name: 'description', content: 'Experience the thrill of stock trading without the risk. Learn investing strategies, compete with friends, and take your chances pulling stocks from packs for your persistent portfolio.' },
+      { name: 'keywords', content: 'fantasy stocks, virtual trading, stock market simulation, investing game, financial education, stock packs, leaderboard, roguelike, stock roguelike, stock market game, stock market simulator, stock trading game, stock trading simulator' },
+      { name: 'author', content: 'Moq Exchange' },
+    ],
+  },
   data: () => ({
     drawer: false,
   }),
