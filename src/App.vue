@@ -30,7 +30,7 @@
           <template v-slot:prepend>
             <v-icon>mdi-help-circle</v-icon>
           </template>
-          <v-list-item-title>FAQ</v-list-item-title>
+          <v-list-item-title>FAQ/How to Play</v-list-item-title>
         </v-list-item>
         <v-list-item to="/privacy-policy">
           <template v-slot:prepend>
