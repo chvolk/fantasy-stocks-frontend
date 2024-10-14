@@ -3,7 +3,7 @@
       <v-row align="center" justify="center" class="mx-0">
         <v-col cols="12" md="10" lg="8">
           <v-card elevation="12" class="pa-6">
-            <v-card-title class="text-h4 font-weight-bold text-center mb-4">
+            <v-card-title class="bazaar-title text-h4 font-weight-bold text-center mb-4">
               The Bazaar
             </v-card-title>
             <!-- User's Gains and Moqs -->
@@ -127,7 +127,7 @@
                     class="elevation-1"
                   >
                     <template v-slot:item.actions="{ item }">
-                      <v-btn small color="success" @click="buyPersistentStock(item)">Buy</v-btn>
+                      <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price">Buy</v-btn>
                       <v-btn small color="error" @click="sellPersistentStock(item)">Sell</v-btn>
                     </template>
                   </v-data-table>
@@ -246,7 +246,7 @@
       <!-- Pack Opening Dialog -->
       <v-dialog v-model="packDialog" max-width="600px" persistent>
         <v-card>
-          <v-card-title class="text-h5" style="text-align: center;">Pack Opening!</v-card-title>
+          <v-card-title class="text-h5 justify-center">Pack Opening!</v-card-title>
           <v-card-text>
             <v-container v-if="packOpeningState === 'selecting'">
               <v-row justify="center">
@@ -258,43 +258,39 @@
                 ></v-progress-circular>
               </v-row>
               <v-row justify="center" class="mt-4">
-                <span class="text-h6" style="text-align: center;">Selecting Industry...</span>
-                </br>
-                <v-spacer class="my-4"></v-spacer>
+                <span class="text-h6">Selecting Industry...</span>
               </v-row>
-            <v-spacer class="my-4"></v-spacer>
             </v-container>
             <v-container v-else-if="packOpeningState === 'revealing' || packOpeningState === 'revealed'">
               <v-row justify="center">
                 <span class="text-h6">{{ selectedIndustry }}</span>
               </v-row>
               <v-row justify="center">
-              <v-data-table
-                v-if="visiblePackStocks.length > 0"
-                :headers="headers"
-                :items="visiblePackStocks"
-                :items-per-page="5"
-                hide-default-footer
-                class="elevation-1"
-              >
-                <template v-slot:item.action="{ item }">
-                  <v-btn
-                    small
-                    color="primary"
-                    @click="selectPackStock(item)"
-                    :disabled="packOpeningState !== 'revealed'"
+                <v-col cols="12">
+                  <v-data-table
+                    v-if="visiblePackStocks.length > 0"
+                    :headers="headers"
+                    :items="visiblePackStocks"
+                    :items-per-page="5"
+                    hide-default-footer
+                    class="elevation-1"
+                    dense
                   >
-                    Add to Inventory
-                  </v-btn>
-                </template>
-              </v-data-table>
+                    <template v-slot:item.action="{ item }">
+                      <v-btn
+                        x-small
+                        color="primary"
+                        @click="selectPackStock(item)"
+                        :disabled="packOpeningState !== 'revealed'"
+                      >
+                        Add
+                      </v-btn>
+                    </template>
+                  </v-data-table>
+                </v-col>
               </v-row>
             </v-container>
           </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <!-- <v-btn color="blue darken-1" text @click="packDialog = false" :disabled="packOpeningState !== 'revealed'">Close</v-btn> -->
-          </v-card-actions>
         </v-card>
       </v-dialog>
       
@@ -435,6 +431,7 @@
       const myListingsHeaders = [
         { title: 'Symbol', value: 'symbol', sortable: true },
         { title: 'Name', value: 'name', sortable: true },
+        { title: 'Tags', value: 'tags', sortable: false },
         { title: 'Listing Price', value: 'price', sortable: true },
         { title: 'Actions', value: 'actions', sortable: false },
         ];
@@ -481,6 +478,7 @@
         { title: 'Name', value: 'name', sortable: true },
         { title: 'Industry', value: 'industry', sortable: true },
         { title: 'Current Price', value: 'current_price', sortable: true },
+        { title: 'Tags', value: 'tags', sortable: false },
         { title: 'Actions', value: 'actions', sortable: false },
       ],
       marketHeaders: [
@@ -489,6 +487,7 @@
         { title: 'Industry', value: 'industry', sortable: true },
         { title: 'Price (Moqs)', value: 'price', sortable: true },
         { title: 'Seller', value: 'seller', sortable: true },
+        { title: 'Tags', value: 'tags', sortable: false },
         { title: 'Actions', value: 'actions', sortable: false },
       ],
       listingsHeaders: [
@@ -496,12 +495,14 @@
         { title: 'Name', value: 'name', sortable: true },
         { title: 'Industry', value: 'industry', sortable: true },
         { title: 'Price (Moqs)', value: 'price', sortable: true },
+        { title: 'Tags', value: 'tags', sortable: false },
         { title: 'Actions', value: 'actions', sortable: false },
       ],
       headers: [
         { title: 'Symbol', value: 'symbol', sortable: true },
         { title: 'Name', value: 'name', sortable: true },
         { title: 'Current Price', value: 'current_price', sortable: true },
+        { title: 'Tags', value: 'tags', sortable: false },
         { title: 'Action', value: 'action', sortable: false }
       ],
       listingDialog: false,
@@ -512,6 +513,7 @@
         { title: 'Name', value: 'name', sortable: true },
         { title: 'Quantity', value: 'quantity', sortable: true },
         { title: 'Current Price', value: 'current_price', sortable: true },
+        { title: 'Tags', value: 'tags', sortable: false },
         { title: 'Actions', value: 'actions', sortable: false },
       ],
       persistentTradeStocks: [],
@@ -573,6 +575,9 @@
       const gains = this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment);
       return gains;
     },
+    calculatedTotalGainLoss() {
+      return this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment) - this.totalSpent;
+    },
   isInventoryFull() {
       return this.inventoryCount >= this.inventoryLimit;
     },
@@ -594,6 +599,8 @@
           const response = await this.api.get('/bazaar/')
           this.totalMoqs = response.data.total_moqs
           this.inventory = response.data.inventory
+          console.log('inventory')
+          console.log(this.inventory)
           this.marketListings = response.data.market_listings
           console.log(this.marketListings)
           this.myListings = response.data.user_listings
@@ -633,8 +640,7 @@
                 this.totalSpent = Number(response.data.total_spent) || 0
                 this.balance = Number(response.data.balance) || 0
                 await this.api.post('/update-gains/', {
-                  total_gain_loss: this.totalGainLoss,
-                  available_gains: this.availableGains
+                  available_gains: this.calculatedTotalGainLoss
                 }, {
                   headers: {
                     'Authorization': `Token ${token}`
@@ -825,7 +831,7 @@
         this.confirmMessage = `Add ${stock.name} (${stock.symbol}) to your inventory? You can only add 1 stock from each pack.`
         this.confirmAction = async () => {
           try {
-            await this.api.post('/bazaar/add-to-inventory/', { symbol: stock.symbol })
+            await this.api.post('/bazaar/add-to-inventory/', { symbol: stock.symbol, tags: stock.tags })
             this.fetchBazaarData()
             this.packDialog = false
             this.confirmDialog = false
@@ -890,6 +896,8 @@
         symbol: this.selectedStock.symbol,
         quantity: 1
         });
+        console.log('response')
+        console.log(response)
         this.$store.commit('setSnackbar', {
         text: 'Stock locked in successfully',
         color: 'success'
@@ -1056,4 +1064,12 @@
     background-color: #FFA500;
     color: #ffffff;
   }
-</style>
+  .bazaar-title {
+    background: linear-gradient(to right, #30CFD0 0%, #330867 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .title-word {
+    animation: color-animation 4s linear infinite;
+  }
+  </style>

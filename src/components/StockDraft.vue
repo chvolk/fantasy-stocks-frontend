@@ -3,7 +3,7 @@
     <v-row align="center" justify="center" class="mx-0">
       <v-col cols="12" md="10" lg="8">
         <v-card elevation="12" class="pa-6">
-          <v-card-title class="text-h4 font-weight-bold text-center mb-4">
+          <v-card-title class="draft-title text-h4 font-weight-bold text-center mb-4">
             Moq Draft
           </v-card-title>
           
@@ -261,7 +261,7 @@ export default {
     async fetchPortfolio() {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/portfolio/', {
+        const response = await axios.get('http://localhost:8000/api/portfolio/', {
           headers: {
             'Authorization': `Token ${token}`
           }
@@ -341,3 +341,22 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.draft-title {
+  background: linear-gradient(to right, #30CFD0 0%, #330867 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 3rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.title-word {
+  animation: color-animation 4s linear infinite;
+}
+.title-word-1 {
+  --color-1: #ACCFCB;
+  --color-2: #E4A9A8;
+  --color-3: #ACCFCB;
+}
+</style>

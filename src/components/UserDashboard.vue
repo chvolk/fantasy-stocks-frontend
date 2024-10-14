@@ -3,7 +3,7 @@
     <v-row align="center" justify="center" class="mx-0">
       <v-col cols="12" md="10" lg="8">
         <v-card elevation="12" class="pa-6">
-          <v-card-title class="text-h4 font-weight-bold text-center mb-4">
+          <v-card-title class="dashboard-title text-h4 font-weight-bold text-center mb-4">
             {{formattedUsername}} Dashboard
           </v-card-title>
 
@@ -47,7 +47,7 @@
                   </span>
                 </template>
                 <template v-slot:item.actions="{ item }">
-                  <v-btn small color="success" @click="openBuyDialog(item)">Buy</v-btn>
+                  <v-btn small color="success" @click="openBuyDialog(item)" :disabled="item.stock.current_price > availableBalance">Buy</v-btn>
                   <v-btn small color="error" @click="openSellDialog(item)">Sell</v-btn>
                 </template>
                 <template v-slot:footer>
@@ -76,7 +76,7 @@
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-card outlined>
-                    <v-card-text class="text-center" :class="totalPortfolioValueColor">
+                    <v-card-text class="text-center">
                       <div class="text-h6">Total Portfolio Value</div>
                       <div :class="['text-h4', totalPortfolioValueColor]">${{ totalPortfolioValue.toFixed(2) }}</div>
                     </v-card-text>
@@ -127,7 +127,7 @@
                   </span>
                 </template>
                 <template v-slot:item.actions="{ item }">
-                  <v-btn small color="success" @click="buyPersistentStock(item)">Buy</v-btn>
+                  <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price">Buy</v-btn>
                   <v-btn small color="error" @click="sellPersistentStock(item)">Sell</v-btn>
                 </template>
               </v-data-table>
@@ -141,7 +141,7 @@
                   <v-card outlined>
                     <v-card-text class="text-center">
                       <div class="text-h6">Available Gains</div>
-                      <div class="text-h4 primary--text">${{ availableGains.toFixed(2) }}</div>
+                      <div :class="['text-h4', availableGainColor]">${{ availableGains.toFixed(2) }}</div>
                     </v-card-text>
                   </v-card>
                 </v-col>
@@ -159,7 +159,7 @@
                   <v-card outlined>
                     <v-card-text class="text-center">
                       <div class="text-h6">Total Portfolio Value</div>
-                      <div class="text-h4">₥{{ persistentTotalValue.toFixed(2) }}</div>
+                      <div :class="['text-h4', persistentTotalValueColor]">₥{{ persistentTotalValue.toFixed(2) }}</div>
                     </v-card-text>
                   </v-card>
                 </v-col>
@@ -361,6 +361,7 @@ export default {
     persistentPortfolioHeaders: [
       { title: 'Ticker', align: 'start', value: 'symbol', sortable: true },
       { title: 'Name', align: 'start', value: 'name', sortable: true },
+      { title: 'Tags', align: 'start', value: 'tags', sortable: true },
       { title: 'Quantity', align: 'end', value: 'quantity', sortable: true },
       { title: 'Purchase Price', align: 'end', value: 'purchase_price', sortable: true },
       { title: 'Current Price', align: 'end', value: 'current_price', sortable: true },
@@ -378,6 +379,7 @@ export default {
     persistentGainLoss: 0,
     availableMoqs: 0,
     availableGains: 0,
+    totalSpent: 0,
   }),
   computed: {
     formattedUsername() {
@@ -389,7 +391,7 @@ export default {
       }
     },
     persistentGainLossColor() {
-    return this.persistentGainLoss >= 0 ? 'success--text' : 'error--text';
+    return this.availableGains >= 0 ? 'success--text' : 'error--text';
   },
   availableGainColor() {
     return this.availableGains >= 0 ? 'success--text' : 'error--text';
@@ -398,7 +400,7 @@ export default {
     return this.persistentTotalValue >= 0 ? 'success--text' : 'error--text';
   },
   persistentTotalGainLossColor() {
-    return this.persistentTotalGainLoss >= 0 ? 'success--text' : 'error--text';
+    return this.calculatedTotalGainLoss >= 0 ? 'success--text' : 'error--text';
   },
   totalPortfolioValueColor() {
     return this.totalPortfolioValue >= 0 ? 'success--text' : 'error--text';
@@ -443,6 +445,13 @@ export default {
       const gains = this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment);
       return gains;
     },
+    calculatedTotalGainLoss() {
+      const gains = this.totalPortfolioValue + (Math.abs(this.balance) - this.initialInvestment) - this.totalSpent;
+      this.$nextTick(() => {
+        this.updateAvailableGains(gains);
+      });
+    return gains;
+    },
     gainLossColor() {
       return this.totalGainLoss > -.01 ? 'green--text' : 'red--text';
     },
@@ -472,8 +481,9 @@ export default {
   }
   },
   mounted() {
-    this.fetchPortfolio();
     this.fetchPersistentPortfolio();
+    this.fetchPortfolio();
+    
     console.log('Headers:', this.table_headers);
   },
   methods: {
@@ -497,9 +507,10 @@ export default {
         this.balance = Number(response.data.balance);
         this.availableBalance = this.balance;
         this.username = response.data.user;
+        this.totalSpent = Number(response.data.total_spent);
         this.availableGains = Number(response.data.available_gains);
         this.initialInvestment = Number(response.data.initial_investment);
-        console.log('Available Gains:', this.availableGains);
+        console.log('Available Gains from fetchPortfolio:', this.availableGains);
         this.$nextTick(() => {
           this.$forceUpdate();
         });
@@ -509,17 +520,28 @@ export default {
         console.log('Total Portfolio Value:', this.totalPortfolioValue);
         console.log('Total Gain/Loss:', this.totalGainLoss);
         // update total gain loss and available gains
-        await axios.post('/api/update-gains/', {
-          total_gain_loss: this.totalGainLoss,
-          available_gains: this.availableGains
-        }, {
-          headers: {
-            'Authorization': `Token ${token}`
-          }
-        });
+        await this.updateAvailableGains(this.calculatedTotalGainLoss);
       } catch (error) {
         console.error('Error fetching portfolio:', error)
       }
+    },
+    async updateAvailableGains(newGains) {
+      try {
+          const token = localStorage.getItem('token');
+          console.log('Updating available gains:', newGains);
+          const response = await axios.post('/api/update-gains/', {
+            available_gains: newGains
+          }, {
+          headers: {
+              'Authorization': `Token ${token}`
+            } 
+          });
+          console.log('Available gains updated successfully:', response.data);
+
+          console.log('Available gains updated successfully');
+        } catch (error) {
+          console.error('Error updating available gains:', error);
+        }
     },
     getRandomColor(symbol) {
       if (!symbol) return 'grey'; // Default color if symbol is undefined
@@ -607,8 +629,10 @@ export default {
           purchase_price: Number(item.purchase_price),
           current_price: Number(item.current_price),
           totalValue: Number(item.quantity) * Number(item.current_price),
-          gain_loss: (Number(item.current_price) - Number(item.purchase_price)) * Number(item.quantity)
+          gain_loss: (Number(item.current_price) - Number(item.purchase_price)) * Number(item.quantity),
+          tags: item.tags
         }));
+        this.totalSpent = response.data.total_spent;
         this.persistentTotalValue = response.data.total_value;
         this.persistentGainLoss = response.data.gain_loss;
         // Store available_moqs if needed
@@ -717,6 +741,7 @@ export default {
         text: `Successfully bought ${this.buyQuantity} shares of ${this.selectedStock.stock.name}`,
         color: 'success'
       });
+      console.log('Available Gains after buy:', response.data.available_gains);
       this.buyPersistentDialog = false;
       await this.fetchPersistentPortfolio();
       await this.fetchPortfolio();
@@ -772,4 +797,29 @@ th {
 .red--text {
   color: #F44336 !important;
 }
+
+.success--text {
+  color: #4CAF50 !important;
+}
+
+.error--text {
+  color: #F44336 !important;
+}
+
+.dashboard-title {
+    background: linear-gradient(to right, #30CFD0 0%, #330867 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 3rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .title-word {
+    animation: color-animation 4s linear infinite;
+  }
+  .title-word-1 {
+    --color-1: #ACCFCB;
+    --color-2: #E4A9A8;
+    --color-3: #ACCFCB;
+  }
 </style>

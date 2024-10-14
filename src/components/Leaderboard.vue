@@ -3,8 +3,10 @@
     <v-row align="center" justify="center" class="mx-0">
       <v-col cols="12" md="10" lg="8">
         <v-card elevation="12" class="pa-6">
-          <v-card-title class="text-h4 font-weight-bold text-center mb-4">
-            Leaderboards
+          <v-card-title class="text-center mb-6">
+            <h1 class="display-2 font-weight-bold leaderboard-title">
+              <span class="title-word title-word-3">Leaderboard</span>
+            </h1>
           </v-card-title>
 
           <v-tabs v-model="activeTab" centered>
@@ -140,5 +142,40 @@
   .moq_tab {
     background-color: #2dca6f;
     color: #ffffff;
+  }
+  .leaderboard-title {
+    background: linear-gradient(to right, #30CFD0 0%, #330867 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 3rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .title-word {
+    animation: color-animation 4s linear infinite;
+  }
+  .title-word-1 {
+    --color-1: #DF8453;
+    --color-2: #3D8DAE;
+    --color-3: #E4A9A8;
+  }
+  .title-word-2 {
+    --color-1: #DBAD4A;
+    --color-2: #ACCFCB;
+    --color-3: #17494D;
+  }
+  .title-word-3 {
+    --color-1: #ACCFCB;
+    --color-2: #E4A9A8;
+    --color-3: #ACCFCB;
+  }
+  @keyframes color-animation {
+    0%    {color: var(--color-1)}
+    32%   {color: var(--color-1)}
+    33%   {color: var(--color-2)}
+    65%   {color: var(--color-2)}
+    66%   {color: var(--color-3)}
+    99%   {color: var(--color-3)}
+    100%  {color: var(--color-1)}
   }
   </style>
