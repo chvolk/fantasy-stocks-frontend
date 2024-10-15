@@ -225,24 +225,34 @@
                     :items="myListings"
                     :items-per-page="5"
                     class="elevation-1"
+                    :custom-class="getRowClass"
                   >
-                    <template v-slot:item.actions="{ item }">
-                      <v-btn
-                        small
-                        color="primary"
-                        @click="editListing(item)"
-                        class="mr-2"
-                      >
-                        Edit
-                      </v-btn>
-                      <v-btn
-                        small
-                        color="error"
-                        @click="cancelListing(item)"
-                        :disabled="isInventoryFull"
-                      >
-                        Remove
-                      </v-btn>
+                    <template v-slot:item="{ item, index }">
+                      <tr :class="getRowClass(item)">
+                        <td v-for="header in myListingsHeaders" :key="header.value">
+                          <template v-if="header.value === 'actions'">
+                            <v-btn
+                              small
+                              color="primary"
+                              @click="editListing(item)"
+                              class="mr-2"
+                            >
+                              Edit
+                            </v-btn>
+                            <v-btn
+                              small
+                              color="error"
+                              @click="cancelListing(item)"
+                              :disabled="isInventoryFull"
+                            >
+                              Remove
+                            </v-btn>
+                          </template>
+                          <template v-else>
+                            {{ item[header.value] }}
+                          </template>
+                        </td>
+                      </tr>
                     </template>
                   </v-data-table>
 
