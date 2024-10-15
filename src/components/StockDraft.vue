@@ -261,7 +261,7 @@ export default {
     async fetchPortfolio() {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:8000/api/portfolio/', {
+        const response = await axios.get('/api/portfolio/', {
           headers: {
             'Authorization': `Token ${token}`
           }
