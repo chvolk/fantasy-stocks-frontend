@@ -794,6 +794,7 @@
                 });
                 this.buyPersistentDialog = false;
                 await this.fetchBazaarData();
+                await this.fetchPortfolio();
             } catch (error) {
                 console.error('Error buying persistent stock:', error);
                 this.$store.commit('setSnackbar', {

@@ -68,11 +68,11 @@ export default {
             </ul>
             <p>Tags add an extra layer of strategy to your trades. Here's how each tag works:</p>
             <ul>
-              <li><strong>COMMISSION (Sell Value Multiplier):</strong> When you sell a stock with this tag, you'll receive a bonus multiplier on the sell value.</li>
-              <li><strong>TENACIOUS (Chance to Keep Shares):</strong> There's a chance you'll keep some shares when selling a stock with this tag.</li>
+              <li><strong>COMMISSION (Sell Value Multiplier):</strong> When you sell a stock with this tag, you have a % chance to receive a bonus multiplier on the sell value.</li>
+              <li><strong>TENACIOUS (Chance to Keep Shares):</strong> There's a % chance you'll keep some shares when selling a stock with this tag.</li>
               <li><strong>SUBSIDIZED (Bonus Sell Value):</strong> Selling a stock with this tag will give you a flat bonus on top of the regular sell value.</li>
-              <li><strong>INSIDER (Chance to Buy Bonus Shares):</strong> When buying a stock with this tag, you might receive bonus shares at no extra cost.</li>
-              <li><strong>GLITCHED (Chance to Change into Random Stock):</strong> Stocks with this tag have a chance to transform into a different random stock from the same industry when bought or sold.</li>
+              <li><strong>INSIDER (Chance to Buy Bonus Shares):</strong> When buying a stock with this tag, you have a % chance to receive bonus shares at no extra cost.</li>
+              <li><strong>GLITCHED (Chance to Change into Random Stock):</strong> Stocks with this tag have a 10%chance to transform into a different random stock from the same industry when bought or sold.</li>
             </ul>
             <p>Remember, these tags can significantly impact your trading strategy. Use them wisely to maximize your gains in the long run!</p>
           `
