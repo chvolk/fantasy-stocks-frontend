@@ -107,28 +107,29 @@
                 :sort-desc="persistentPortfolioOptions.sortDesc"
                 show-headers
               >
-                <template v-slot:item.symbol="{ item }">
-                  <v-chip :color="getRandomColor(item.symbol)" text-color="white" small>
-                    {{ item.symbol || 'N/A' }}
-                  </v-chip>
-                </template>
-                <template v-slot:item.purchase_price="{ item }">
-                  ${{ item.purchase_price.toFixed(2) }}
-                </template>
-                <template v-slot:item.current_price="{ item }">
-                  ${{ item.current_price.toFixed(2) }}
-                </template>
-                <template v-slot:item.totalValue="{ item }">
-                  ${{ item.totalValue.toFixed(2) }}
-                </template>
-                <template v-slot:item.gain_loss="{ item }">
-                  <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
-                    {{ item.gain_loss >= 0 ? '+' : '-' }}${{ Math.abs(item.gain_loss).toFixed(2) }}
-                  </span>
-                </template>
-                <template v-slot:item.actions="{ item }">
-                  <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price">Buy</v-btn>
-                  <v-btn small color="error" @click="sellPersistentStock(item)">Sell</v-btn>
+                <template v-slot:item="{ item }">
+                  <tr :class="getRowClass(item)">
+                    <td>
+                      <v-chip :color="getRandomColor(item.symbol)" text-color="white" small>
+                        {{ item.symbol || 'N/A' }}
+                      </v-chip>
+                    </td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.tags }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.purchase_price.toFixed(2) }}</td>
+                    <td>${{ item.current_price.toFixed(2) }}</td>
+                    <td>${{ item.totalValue.toFixed(2) }}</td>
+                    <td>
+                      <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
+                        {{ item.gain_loss >= 0 ? '+' : '-' }}${{ Math.abs(item.gain_loss).toFixed(2) }}
+                      </span>
+                    </td>
+                    <td>
+                      <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price">Buy</v-btn>
+                      <v-btn small color="error" @click="sellPersistentStock(item)">Sell</v-btn>
+                    </td>
+                  </tr>
                 </template>
               </v-data-table>
             </v-card-text>
@@ -601,6 +602,15 @@ export default {
     updateTableOptions(options) {
       this.tableOptions = options;
     },
+    getRowClass(item) {
+      if (item.tags.includes('COMMISSION')) return 'commission-row';
+      if (item.tags.includes('TENACIOUS')) return 'tenacious-row';
+      if (item.tags.includes('SUBSIDIZED')) return 'subsidized-row';
+      if (item.tags.includes('INSIDER')) return 'insider-row';
+      if (item.tags.includes('GLITCHED')) return 'glitched-row';
+      if (item.tags.includes('SHORTSQUEEZE')) return 'shortsqueeze-row';
+      return '';
+    },
     getNestedValue(obj, path) {
     if (typeof path === 'string') {
       return path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
@@ -822,4 +832,81 @@ th {
     --color-2: #E4A9A8;
     --color-3: #ACCFCB;
   }
+  .commission-row {
+  background-color: #FFA07A !important; /* Light Salmon */
+  animation: glitch 0.5s infinite;
+}
+
+.tenacious-row {
+  background-color: #98FB98 !important; /* Pale Green */
+  animation: glitch 0.5s infinite;
+}
+
+.subsidized-row {
+  background-color: #87CEFA !important; /* Light Sky Blue */
+  animation: glitch 0.5s infinite;
+}
+
+.insider-row {
+  background-color: #DDA0DD !important; /* Plum */
+  animation: glitch 0.5s infinite;
+}
+
+.glitched-row {
+  background-color: #F0E68C !important; /* Khaki */
+  animation: glitch 0.5s infinite;
+}
+
+.shortsqueeze-row {
+  background-color: #FF6347 !important; /* Tomato */
+  animation: glitch 0.5s infinite;
+}
+
+@keyframes subtle-glitch {
+  0% {
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  14% {
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  15% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  49% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  50% {
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                0.05em 0 0 rgba(0, 255, 0, 0.75),
+                0 -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  99% {
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                0.05em 0 0 rgba(0, 255, 0, 0.75),
+                0 -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  100% {
+    text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+}
+
+.glitched-row {
+  position: relative;
+  background-color: rgba(240, 230, 140, 0.3) !important; /* Khaki with transparency */
+  animation: subtle-glitch 2.5s infinite;
+}
+
+.glitched-row:hover {
+  animation: subtle-glitch 0.3s infinite;
+}
 </style>
