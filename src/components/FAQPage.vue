@@ -58,6 +58,26 @@ export default {
           `
         },
         {
+          question: 'What is the Persistent Portfolio and how do Tags work?',
+          answer: `
+            <p>The Persistent Portfolio is your long-term investment strategy that doesn't reset weekly:</p>
+            <ul>
+              <li>Unlike the weekly portfolio, stocks in your persistent portfolio carry over week to week.</li>
+              <li>You can add stocks to your persistent portfolio by "locking in" stocks from your inventory.</li>
+              <li>Stocks in your persistent portfolio can have special Tags that give them unique properties.</li>
+            </ul>
+            <p>Tags add an extra layer of strategy to your trades. Here's how each tag works:</p>
+            <ul>
+              <li><strong>COMMISSION (Sell Value Multiplier):</strong> When you sell a stock with this tag, you'll receive a bonus multiplier on the sell value.</li>
+              <li><strong>TENACIOUS (Chance to Keep Shares):</strong> There's a chance you'll keep some shares when selling a stock with this tag.</li>
+              <li><strong>SUBSIDIZED (Bonus Sell Value):</strong> Selling a stock with this tag will give you a flat bonus on top of the regular sell value.</li>
+              <li><strong>INSIDER (Chance to Buy Bonus Shares):</strong> When buying a stock with this tag, you might receive bonus shares at no extra cost.</li>
+              <li><strong>GLITCHED (Chance to Change into Random Stock):</strong> Stocks with this tag have a chance to transform into a different random stock when bought or sold.</li>
+            </ul>
+            <p>Remember, these tags can significantly impact your trading strategy. Use them wisely to maximize your gains in the long run!</p>
+          `
+        },
+        {
           question: 'What are the Leaderboards about?',
           answer: `
             <p>Our leaderboards show who's the top dog in the trading world:</p>
@@ -67,7 +87,7 @@ export default {
               <li>Total Moqs are calculated as (persistent portfolio value + total Moqs).</li>
             </ul>
           `
-        }
+        },
       ]
     }
   }
