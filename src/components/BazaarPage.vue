@@ -188,6 +188,7 @@
                         <td>{{ item.name }}</td>
                         <td>{{ item.industry }}</td>
                         <td>₥{{ item.price }}</td>
+                        <td>${{ Number(item.current_price).toFixed(2) }}</td>
                         <td>{{ item.seller }}</td>
                         <td>{{ item.tags }}</td>
                         <td>
@@ -532,6 +533,7 @@
         { title: 'Name', value: 'name', sortable: true },
         { title: 'Industry', value: 'industry', sortable: true },
         { title: 'Price (Moqs)', value: 'price', sortable: true },
+        { title: 'Current Price', value: 'current_price', sortable: true },
         { title: 'Seller', value: 'seller', sortable: true },
         { title: 'Tags', value: 'tags', sortable: false },
         { title: 'Actions', value: 'actions', sortable: false },
