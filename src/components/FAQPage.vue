@@ -38,9 +38,9 @@ export default {
             <p>The weekly draft is your chance to play the market with a new strategy each week. Build gains to buy packs from the Bazaar or increase your shares in stocks from your persistent portfolio:</p>
             <ul>
               <li>You're given a 50k stake to wrangle up a selection of stocks for the week.</li>
-              <li>The stock corral changes weekly, offering different industries or values.</li>
+              <li>The stock corral changes weekly, offering different industries or select symbols.</li>
               <li>Your gains can be used to buy packs in the Bazaar or to increase your shares in stocks from packs or the player market.</li>
-              <li>Remember, pardner, you can't earn Moq (our persistent currency) through the weekly draft.</li>
+              <li>Remember, you can't earn Moq (our persistent currency) through the weekly draft.</li>
             </ul>
           `
         },
