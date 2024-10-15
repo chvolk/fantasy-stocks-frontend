@@ -186,8 +186,9 @@
                       <tr :class="getRowClass(item)">
                         <td>{{ item.symbol }}</td>
                         <td>{{ item.name }}</td>
-                        <td>{{ item.seller }}</td>
+                        <td>{{ item.industry }}</td>
                         <td>₥{{ item.price }}</td>
+                        <td>{{ item.seller }}</td>
                         <td>{{ item.tags }}</td>
                         <td>
                           <v-btn
