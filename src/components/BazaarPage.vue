@@ -104,9 +104,18 @@
                 :items-per-page="5"
                 class="elevation-1"
               >
-                <template v-slot:item.actions="{ item }">
-                  <v-btn small color="success" @click="lockInStock(item)" :disabled="isPersistentPortfolioFull">Lock In</v-btn>
-                  <v-btn small color="info" @click="listStock(item)" :disabled="isMarketListingFull">List</v-btn>
+                <template v-slot:item="{ item }">
+                  <tr :class="getRowClass(item)">
+                    <td>{{ item.symbol }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.industry }}</td>
+                    <td>${{ Number(item.current_price).toFixed(2) }}</td>
+                    <td>{{ item.tags }}</td>
+                    <td>
+                      <v-btn small color="success" @click="lockInStock(item)" :disabled="isPersistentPortfolioFull">Lock In</v-btn>
+                      <v-btn small color="info" @click="listStock(item)" :disabled="isMarketListingFull">List</v-btn>
+                    </td>
+                  </tr>
                 </template>
               </v-data-table>
             </v-card>
@@ -126,9 +135,18 @@
                     :items-per-page="5"
                     class="elevation-1"
                   >
-                    <template v-slot:item.actions="{ item }">
-                      <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price">Buy</v-btn>
-                      <v-btn small color="error" @click="sellPersistentStock(item)">Sell</v-btn>
+                    <template v-slot:item="{ item }">
+                      <tr :class="getRowClass(item)">
+                        <td>{{ item.symbol }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ Number(item.current_price).toFixed(2) }}</td>
+                        <td>{{ item.tags }}</td>
+                        <td>
+                          <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price">Buy</v-btn>
+                          <v-btn small color="error" @click="sellPersistentStock(item)">Sell</v-btn>
+                        </td>
+                      </tr>
                     </template>
                   </v-data-table>
 
@@ -164,15 +182,24 @@
                     :items-per-page="5"
                     class="elevation-1"
                   >
-                    <template v-slot:item.actions="{ item }">
-                      <v-btn
-                        small
-                        color="success"
-                        @click="buyMarketStock(item)"
-                        :disabled="username === item.seller || isInventoryFull || totalMoqs < item.price" 
-                      >
-                        Buy
-                      </v-btn>
+                    <template v-slot:item="{ item }">
+                      <tr :class="getRowClass(item)">
+                        <td>{{ item.symbol }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.seller }}</td>
+                        <td>₥{{ item.price }}</td>
+                        <td>{{ item.tags }}</td>
+                        <td>
+                          <v-btn
+                            small
+                            color="success"
+                            @click="buyMarketStock(item)"
+                            :disabled="username === item.seller || isInventoryFull || totalMoqs < item.price" 
+                          >
+                            Buy
+                          </v-btn>
+                        </td>
+                      </tr>
                     </template>
                   </v-data-table>
 
@@ -276,15 +303,23 @@
                     class="elevation-1"
                     dense
                   >
-                    <template v-slot:item.action="{ item }">
-                      <v-btn
-                        x-small
-                        color="primary"
-                        @click="selectPackStock(item)"
-                        :disabled="packOpeningState !== 'revealed'"
-                      >
-                        Add
-                      </v-btn>
+                    <template v-slot:item="{ item }">
+                      <tr :class="getRowClass(item)">
+                        <td>{{ item.symbol }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>${{ Number(item.current_price).toFixed(2) }}</td>
+                        <td>{{ item.tags }}</td>
+                        <td>
+                          <v-btn
+                            x-small
+                            color="primary"
+                            @click="selectPackStock(item)"
+                            :disabled="packOpeningState !== 'revealed'"
+                          >
+                            Add
+                          </v-btn>
+                        </td>
+                      </tr>
                     </template>
                   </v-data-table>
                 </v-col>
@@ -658,6 +693,15 @@
       setTimeout(() => {
         window.scrollTo(0, window.pageYOffset);
       }, 0);
+    },
+    getRowClass(item) {
+      if (item.tags.includes('COMMISSION')) return 'commission-row';
+      if (item.tags.includes('TENACIOUS')) return 'tenacious-row';
+      if (item.tags.includes('SUBSIDIZED')) return 'subsidized-row';
+      if (item.tags.includes('INSIDER')) return 'insider-row';
+      if (item.tags.includes('GLITCHED')) return 'glitched-row';
+      if (item.tags.includes('SHORTSQUEEZE')) return 'shortsqueeze-row';
+      return '';
     },
       async buyPack(currency) {
         try {
@@ -1072,4 +1116,81 @@
   .title-word {
     animation: color-animation 4s linear infinite;
   }
+  .commission-row {
+  background-color: #FFA07A !important; /* Light Salmon */
+  animation: glitch 0.5s infinite;
+}
+
+.tenacious-row {
+  background-color: #98FB98 !important; /* Pale Green */
+  animation: glitch 0.5s infinite;
+}
+
+.subsidized-row {
+  background-color: #87CEFA !important; /* Light Sky Blue */
+  animation: glitch 0.5s infinite;
+}
+
+.insider-row {
+  background-color: #DDA0DD !important; /* Plum */
+  animation: glitch 0.5s infinite;
+}
+
+.glitched-row {
+  background-color: #F0E68C !important; /* Khaki */
+  animation: glitch 0.5s infinite;
+}
+
+.shortsqueeze-row {
+  background-color: #FF6347 !important; /* Tomato */
+  animation: glitch 0.5s infinite;
+}
+
+@keyframes subtle-glitch {
+  0% {
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  14% {
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  15% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  49% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  50% {
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                0.05em 0 0 rgba(0, 255, 0, 0.75),
+                0 -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  99% {
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                0.05em 0 0 rgba(0, 255, 0, 0.75),
+                0 -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  100% {
+    text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+}
+
+.glitched-row {
+  position: relative;
+  background-color: rgba(240, 230, 140, 0.3) !important; /* Khaki with transparency */
+  animation: subtle-glitch 2.5s infinite;
+}
+
+.glitched-row:hover {
+  animation: subtle-glitch 0.3s infinite;
+}
   </style>
