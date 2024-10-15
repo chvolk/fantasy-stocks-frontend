@@ -62,7 +62,7 @@ export default {
           answer: `
             <p>The Persistent Portfolio is your long-term investment strategy that doesn't reset weekly:</p>
             <ul>
-              <li>Unlike the weekly portfolio, stocks in your persistent portfolio carry over week to week.</li>
+              <li>Unlike the weekly portfolio, stocks in your persistent portfolio carry over week to week, only being reset at the start of a new season.</li>
               <li>You can add stocks to your persistent portfolio by "locking in" stocks from your inventory.</li>
               <li>Stocks in your persistent portfolio can have special Tags that give them unique properties.</li>
             </ul>
