@@ -119,10 +119,10 @@
                     <td>{{ item.quantity }}</td>
                     <td>${{ item.purchase_price.toFixed(2) }}</td>
                     <td>${{ item.current_price.toFixed(2) }}</td>
-                    <td>${{ item.totalValue.toFixed(2) }}</td>
+                    <td>₥{{ item.totalValue.toFixed(2) }}</td>
                     <td>
                       <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
-                        {{ item.gain_loss >= 0 ? '+' : '-' }}${{ Math.abs(item.gain_loss).toFixed(2) }}
+                        {{ item.gain_loss >= 0 ? '+' : '-' }}₥{{ Math.abs(item.gain_loss).toFixed(2) }}
                       </span>
                     </td>
                     <td>
