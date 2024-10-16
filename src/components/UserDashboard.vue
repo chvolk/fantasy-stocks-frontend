@@ -106,27 +106,28 @@
                 :sort-by="persistentPortfolioOptions.sortBy"
                 :sort-desc="persistentPortfolioOptions.sortDesc"
                 show-headers
+                class="persistent-portfolio-table"
               >
                 <template v-slot:item="{ item }">
                   <tr :class="getRowClass(item)">
-                    <td>
+                    <td class="text-center">
                       <v-chip :color="getRandomColor(item.symbol)" text-color="white" small>
                         {{ item.symbol || 'N/A' }}
                       </v-chip>
                     </td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.tags }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>${{ item.purchase_price.toFixed(2) }}</td>
-                    <td>${{ item.current_price.toFixed(2) }}</td>
-                    <td>₥{{ item.totalValue.toFixed(2) }}</td>
-                    <td>
+                    <td class="text-center">{{ item.name }}</td>
+                    <td class="text-center">{{ item.tags }}</td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-center">${{ item.purchase_price.toFixed(2) }}</td>
+                    <td class="text-center">${{ item.current_price.toFixed(2) }}</td>
+                    <td class="text-center">₥{{ item.totalValue.toFixed(2) }}</td>
+                    <td class="text-center">
                       <span :class="item.gain_loss >= 0 ? 'success--text' : 'error--text'">
                         {{ item.gain_loss >= 0 ? '+' : '-' }}₥{{ Math.abs(item.gain_loss).toFixed(2) }}
                       </span>
                     </td>
-                    <td>
-                      <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price">Buy</v-btn>
+                    <td class="text-center">
+                      <v-btn small color="success" @click="buyPersistentStock(item)" :disabled="availableGains < item.current_price" class="mr-2">Buy</v-btn>
                       <v-btn small color="error" @click="sellPersistentStock(item)">Sell</v-btn>
                     </td>
                   </tr>
@@ -908,5 +909,17 @@ th {
 
 .glitched-row:hover {
   animation: subtle-glitch 0.3s infinite;
+}
+
+.persistent-portfolio-table >>> .v-data-table__wrapper > table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+.persistent-portfolio-table >>> .v-data-table__wrapper > table > thead > tr > th {
+  text-align: center !important;
+}
+
+.persistent-portfolio-table >>> .v-data-table__wrapper > table > tbody > tr > td:last-child {
+  white-space: nowrap;
 }
 </style>
